@@ -1,0 +1,25 @@
+<svg width="1069" height="32" viewBox="0 0 1069 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="top/&#232;&#163;&#133;&#233;&#165;&#176;">
+<path id="line" d="M0.5 31H478.5L507.5 1H1051" stroke="url(#paint0_linear_92_5)" stroke-width="2"/>
+<path id="Vector 1" d="M544 9.5H1055L1067.5 23.5" stroke="url(#paint1_linear_92_5)" stroke-width="2"/>
+<path id="Rectangle 1" d="M420.848 23.2L433.426 9.8H449.152L436.574 23.2H420.848Z" stroke="#97BBE6" stroke-width="1.6"/>
+<path id="Rectangle 2" d="M440.848 23.2L453.426 9.8H469.152L456.574 23.2H440.848Z" stroke="#CBDEF3" stroke-width="1.6"/>
+<path id="Rectangle 3" d="M460.848 23.2L473.426 9.8H489.152L476.574 23.2H460.848Z" stroke="#CFE3F9" stroke-width="1.6"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_92_5" x1="0.5" y1="16" x2="821" y2="16" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6A9DDA" stop-opacity="0"/>
+<stop offset="0.148684" stop-color="#6A9DDA"/>
+<stop offset="0.31" stop-color="#6A9DDA" stop-opacity="0.15"/>
+<stop offset="0.354066" stop-color="#6A9DDA" stop-opacity="0.65"/>
+<stop offset="0.75" stop-color="#6A9DDA"/>
+<stop offset="1" stop-color="#6A9DDA" stop-opacity="0.32"/>
+</linearGradient>
+<linearGradient id="paint1_linear_92_5" x1="554" y1="16.5" x2="1067.5" y2="16.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6A9DDA" stop-opacity="0.24"/>
+<stop offset="0.521265" stop-color="#6A9DDA" stop-opacity="0.78"/>
+<stop offset="0.90704" stop-color="#6A9DDA" stop-opacity="0.64"/>
+<stop offset="1" stop-color="#6A9DDA" stop-opacity="0.05"/>
+</linearGradient>
+</defs>
+</svg>
