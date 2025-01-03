@@ -1,4 +1,5 @@
 import { Cacheables } from "cacheables";
+import { fetchUserToken } from "./usrcloud.service";
 
 export const cache = new Cacheables({
   enabled: true,
@@ -6,28 +7,8 @@ export const cache = new Cacheables({
   log: true,
 });
 
-export const getUserToken = () =>
-  cache.cacheable(
-    async () => {
-      const response = await fetch(
-        "https://openapi.mp.usr.cn/usrCloud/V6/user/getAuthToken",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            appKey: "JzihOBti",
-            appSecret: "edc919p2md2afinboc4r29k06y284eck",
-          }),
-        }
-      );
-
-      return JSON.stringify(await response.json());
-    },
-    "token",
-    {
-      cachePolicy: "max-age",
-      maxAge: 7200000, // 2 hours
-    }
-  );
+export const get = (key: string) =>
+  cache.cacheable(fetchUserToken, key, {
+    cachePolicy: "max-age",
+    maxAge: 7200000, // 2 hours
+  });
