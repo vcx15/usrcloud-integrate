@@ -1,3 +1,7 @@
+"use client"
+
+import MapChart from "@/components/MapChart";
+
 export default function BigScreen() {
   return (
     <div className="flex flex-col">
@@ -51,7 +55,7 @@ function OrgEnergyConsumeArea() {
 
 function MapArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[43.8125rem] text-center">地图</div>
+    <div className="bg-[#33333333] w-full h-[43.8125rem] text-center"><MapChart /></div>
   );
 }
 
