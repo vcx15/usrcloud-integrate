@@ -1,6 +1,9 @@
-"use client"
+"use client";
 
 import MapChart from "@/components/MapChart";
+import Image from "next/image";
+import Logo from "@/public/logo_icon.png";
+import SplitLine from "@/public/split.svg";
 
 export default function BigScreen() {
   return (
@@ -28,8 +31,27 @@ export default function BigScreen() {
 
 function HeadArea() {
   return (
-    <div className="bg-[#33333333] h-[3.5625rem] mt-2 mx-3.5 text-center">
-      头部位置
+    <div className="flex flex-row bg-[#33333333] h-[3.5625rem] mt-2 mx-3.5 text-center">
+      <div className="flex flex-row w-[66.8125rem] bg-[url('/top_head.svg')] bg-bottom bg-no-repeat">
+        <div className="flex ml-1 mb-2">
+          <Image src={Logo} alt="logo" />
+        </div>
+        <div className="flex mx-2.5 items-center">
+          <Image src={SplitLine} alt="split" />
+        </div>
+        <div className="flex flex-col items-start justify-between mt-1 mb-2">
+          <div className="flex text-xl font-semibold">基站能耗管理平台</div>
+          <div className="flex text-xs font-normal">
+            Base station energy management platform
+          </div>
+        </div>
+      </div>
+      <div className="flex grow">buttons</div>
+      <div className="flex w-[16.6875rem] bg-[url('/top_time_bg.svg')] bg-bottom bg-no-repeat mr-2.5">
+        <div className="flex w-full justify-end justify-items-center items-center mr-2.5 mt-4">
+          <span className="font-medium">2025.01.03 09:00</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -55,7 +77,9 @@ function OrgEnergyConsumeArea() {
 
 function MapArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[43.8125rem] text-center"><MapChart /></div>
+    <div className="bg-[#33333333] w-full h-[43.8125rem] text-center">
+      <MapChart />
+    </div>
   );
 }
 
