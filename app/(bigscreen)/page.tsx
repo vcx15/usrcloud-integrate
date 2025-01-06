@@ -1,9 +1,13 @@
 "use client";
 
-import MapChart from "@/components/MapChart";
+import MapChart from "@/components/charts/MapChart";
 import Image from "next/image";
 import Logo from "@/public/logo_icon.png";
 import SplitLine from "@/public/split.svg";
+import DropDownButton from "@/components/buttons/DropDownButton";
+import LocationIcon from "@/public/ico_loc.svg";
+import UserIcon from "@/public/ico_user.svg";
+import GeneralButton from "@/components/buttons/GeneralButton";
 
 export default function BigScreen() {
   return (
@@ -46,7 +50,22 @@ function HeadArea() {
           </div>
         </div>
       </div>
-      <div className="flex grow">buttons</div>
+      {
+        /**
+         * TODO: 排版有问题，需要调整
+         */
+      }
+      <div className="flex flex-row grow">
+        <div>
+          <DropDownButton icon={LocationIcon} text={"中国（98/106）"} />
+        </div>
+        <div>
+          <DropDownButton icon={UserIcon} text={"管理员"} />
+        </div>
+        <div>
+          <GeneralButton customStyle="text-white bg-[#2E8BFFFF] px-4 py-1.5 rounded-2xl" text={"生成报表"} />
+        </div>
+      </div>
       <div className="flex w-[16.6875rem] bg-[url('/top_time_bg.svg')] bg-bottom bg-no-repeat mr-2.5">
         <div className="flex w-full justify-end justify-items-center items-center mr-2.5 mt-4">
           <span className="font-medium">2025.01.03 09:00</span>
