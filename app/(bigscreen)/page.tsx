@@ -7,7 +7,9 @@ import SplitLine from "@/public/split.svg";
 import DropDownButton from "@/components/buttons/DropDownButton";
 import LocationIcon from "@/public/ico_loc.svg";
 import UserIcon from "@/public/ico_user.svg";
+import TitlePrefixIcon from "@/public/ico_title_prefix.svg";
 import GeneralButton from "@/components/buttons/GeneralButton";
+import ObjectStatisticsCard from "@/components/ObjectStatisticsCard";
 
 export default function BigScreen() {
   return (
@@ -50,11 +52,9 @@ function HeadArea() {
           </div>
         </div>
       </div>
-      {
-        /**
-         * TODO: 排版有问题，需要调整
-         */
-      }
+      {/**
+       * TODO: 排版有问题，需要调整
+       */}
       <div className="flex flex-row grow">
         <div>
           <DropDownButton icon={LocationIcon} text={"中国（98/106）"} />
@@ -63,7 +63,10 @@ function HeadArea() {
           <DropDownButton icon={UserIcon} text={"管理员"} />
         </div>
         <div>
-          <GeneralButton customStyle="text-white bg-[#2E8BFFFF] px-4 py-1.5 rounded-2xl" text={"生成报表"} />
+          <GeneralButton
+            customStyle="text-white bg-[#2E8BFFFF] px-4 py-1.5 rounded-2xl"
+            text={"生成报表"}
+          />
         </div>
       </div>
       <div className="flex w-[16.6875rem] bg-[url('/top_time_bg.svg')] bg-bottom bg-no-repeat mr-2.5">
@@ -76,7 +79,40 @@ function HeadArea() {
 }
 
 function ObjectStatisticsArea() {
-  return <div className="bg-[#33333333] w-full h-60 text-center">对象统计</div>;
+  return (
+    <div className="flex flex-col bg-[#33333333] w-full h-60 text-center">
+      <div className="flex flex-row">
+        <Image src={TitlePrefixIcon} alt="" />
+        <span>对象统计</span>
+      </div>
+      <div className="flex flex-row">
+        <div className="flex flex-col">
+          <ObjectStatisticsCard
+            icon={LocationIcon}
+            label="基站总数量"
+            value={100}
+          />
+          <ObjectStatisticsCard
+            icon={LocationIcon}
+            label="摄像头总数量"
+            value={100}
+          />
+        </div>
+        <div className="flex flex-col">
+          <ObjectStatisticsCard
+            icon={LocationIcon}
+            label="基站总数量"
+            value={100}
+          />
+          <ObjectStatisticsCard
+            icon={LocationIcon}
+            label="摄像头总数量"
+            value={100}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function EnergyConsumeArea() {
