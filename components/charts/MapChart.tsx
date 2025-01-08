@@ -15,7 +15,6 @@ export default function MapChart() {
         registerMap("HK", (await res.json()) as GeoJSONSourceInput);
       })
       .finally(() => {
-        console.log("GEO JSON", geoJson);
         setOptions({
           title: {
             text: "Population Density of Hong Kong （2011）",

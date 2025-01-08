@@ -7,9 +7,11 @@ import SplitLine from "@/public/split.svg";
 import DropDownButton from "@/components/buttons/DropDownButton";
 import LocationIcon from "@/public/ico_loc.svg";
 import UserIcon from "@/public/ico_user.svg";
-import TitlePrefixIcon from "@/public/ico_title_prefix.svg";
+
 import GeneralButton from "@/components/buttons/GeneralButton";
 import ObjectStatisticsCard from "@/components/ObjectStatisticsCard";
+import AreaTitle from "@/components/AreaTitle";
+import BarWithBackgroundChart from "@/components/charts/BarWithBackgroundChart";
 
 export default function BigScreen() {
   return (
@@ -81,10 +83,7 @@ function HeadArea() {
 function ObjectStatisticsArea() {
   return (
     <div className="flex flex-col bg-[#33333333] w-full h-60 text-center">
-      <div className="flex flex-row">
-        <Image src={TitlePrefixIcon} alt="" />
-        <span>对象统计</span>
-      </div>
+      <AreaTitle title="对象统计" />
       <div className="flex flex-row">
         <div className="flex flex-col">
           <ObjectStatisticsCard
@@ -117,15 +116,18 @@ function ObjectStatisticsArea() {
 
 function EnergyConsumeArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[22.5rem] text-center">
-      运营商能耗
+    <div className="flex flex-col bg-[#33333333] w-full h-[22.5rem] text-center">
+      <AreaTitle title="运营商能耗" />
+      <div className="h-4/5">
+        <BarWithBackgroundChart />
+      </div>
     </div>
   );
 }
 function OrgEnergyConsumeArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
-      组织内能耗
+      <AreaTitle title="组织内能耗" />
     </div>
   );
 }
@@ -148,20 +150,22 @@ function TrendArea() {
 
 function RatioArea() {
   return (
-    <div className="bg-[#33333333] w-full h-60 text-center">运营商能耗占比</div>
+    <div className="bg-[#33333333] w-full h-60 text-center">
+      <AreaTitle title="运营商能耗分摊占比" />
+    </div>
   );
 }
 function WarningArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.5rem] text-center">
-      实时告警
+      <AreaTitle title="实时告警" />
     </div>
   );
 }
 function BillArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
-      账单区域
+      <AreaTitle title="电费" />
     </div>
   );
 }
