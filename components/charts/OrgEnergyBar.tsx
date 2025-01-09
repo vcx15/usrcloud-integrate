@@ -1,6 +1,6 @@
 import Chart from "./Chart";
 
-export default function BarWithBackgroundChart() {
+export default function OrgEnergyBar() {
   const options = {
     xAxis: {
       type: "category",
@@ -12,17 +12,20 @@ export default function BarWithBackgroundChart() {
     series: [
       {
         data: [200, 200, 200, 200, 200, 200, 200],
-        type: "pictorialBar",
-        symbol: "rect",
+        type: "bar",
         barWidth: "60%", // 设置柱体宽度
         itemStyle: {
+          borderRadius: [16, 16, 0, 0], // 设置柱体上方为圆角
           color: "#ffffffaf", // 设置柱体颜色
         },
         z: -1, // 设置柱体层级，使得背景在柱体下方
       },
       {
         data: [120, 200, 150, 80, 70, 110, 130],
-        type: "bar",
+        type: "pictorialBar",
+        symbol: "rect",
+        symbolRepeat: true,
+        symbolSize: [10, 4],
         barWidth: "20%", // 设置柱体宽度
         itemStyle: {
           borderRadius: [16, 16, 0, 0], // 设置柱体上方为圆角

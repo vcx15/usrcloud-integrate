@@ -12,6 +12,7 @@ import GeneralButton from "@/components/buttons/GeneralButton";
 import ObjectStatisticsCard from "@/components/ObjectStatisticsCard";
 import AreaTitle from "@/components/AreaTitle";
 import BarWithBackgroundChart from "@/components/charts/BarWithBackgroundChart";
+import OrgEnergyBar from "@/components/charts/OrgEnergyBar";
 
 export default function BigScreen() {
   return (
@@ -128,6 +129,9 @@ function OrgEnergyConsumeArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
       <AreaTitle title="组织内能耗" />
+      <div className="h-4/5">
+        <OrgEnergyBar />
+      </div>
     </div>
   );
 }
