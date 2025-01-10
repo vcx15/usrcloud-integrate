@@ -13,6 +13,8 @@ import ObjectStatisticsCard from "@/components/ObjectStatisticsCard";
 import AreaTitle from "@/components/AreaTitle";
 import BarWithBackgroundChart from "@/components/charts/BarWithBackgroundChart";
 import OrgEnergyBar from "@/components/charts/OrgEnergyBar";
+import AreaChart from "@/components/charts/AreaChart";
+import RingPieChart from "@/components/charts/RingPieChart";
 
 export default function BigScreen() {
   return (
@@ -119,7 +121,7 @@ function EnergyConsumeArea() {
   return (
     <div className="flex flex-col bg-[#33333333] w-full h-[22.5rem] text-center">
       <AreaTitle title="运营商能耗" />
-      <div className="h-4/5">
+      <div className="h-full">
         <BarWithBackgroundChart />
       </div>
     </div>
@@ -129,7 +131,7 @@ function OrgEnergyConsumeArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
       <AreaTitle title="组织内能耗" />
-      <div className="h-4/5">
+      <div className="h-full">
         <OrgEnergyBar />
       </div>
     </div>
@@ -147,7 +149,9 @@ function MapArea() {
 function TrendArea() {
   return (
     <div className="bg-[#33333333] w-full h-[16.75rem] text-center">
-      能耗趋势
+      <div className="h-full">
+        <AreaChart />
+      </div>
     </div>
   );
 }
@@ -156,6 +160,11 @@ function RatioArea() {
   return (
     <div className="bg-[#33333333] w-full h-60 text-center">
       <AreaTitle title="运营商能耗分摊占比" />
+      <div className="flex flex-row h-full">
+        <div className="w-[30%] h-full">
+          <RingPieChart />
+        </div>
+      </div>
     </div>
   );
 }
