@@ -16,6 +16,7 @@ import OrgEnergyBar from "@/components/charts/OrgEnergyBar";
 import AreaChart from "@/components/charts/AreaChart";
 import RingPieChart from "@/components/charts/RingPieChart";
 import WarningTable from "@/components/charts/WarningTable";
+import ChargeCard from "@/components/ChargeCard";
 
 export default function BigScreen() {
   return (
@@ -181,6 +182,7 @@ function BillArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
       <AreaTitle title="电费" />
+      <ChargeCard />
     </div>
   );
 }
