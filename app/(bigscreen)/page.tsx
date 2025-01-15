@@ -15,6 +15,7 @@ import BarWithBackgroundChart from "@/components/charts/BarWithBackgroundChart";
 import OrgEnergyBar from "@/components/charts/OrgEnergyBar";
 import AreaChart from "@/components/charts/AreaChart";
 import RingPieChart from "@/components/charts/RingPieChart";
+import WarningTable from "@/components/charts/WarningTable";
 
 export default function BigScreen() {
   return (
@@ -172,6 +173,7 @@ function WarningArea() {
   return (
     <div className="bg-[#33333333] w-full h-[22.5rem] text-center">
       <AreaTitle title="实时告警" />
+      <WarningTable />
     </div>
   );
 }
