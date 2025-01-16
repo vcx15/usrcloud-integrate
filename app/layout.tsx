@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[url('/bg.svg')] w-full h-full`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[url('/bg.svg')] inline-block w-[1920px] h-[1080px] origin-top-left absolute overflow-hidden`}
       >
         <AntdRegistry>{children}</AntdRegistry>
       </body>
