@@ -17,7 +17,9 @@ import AreaChart from "@/components/charts/AreaChart";
 import RingPieChart from "@/components/charts/RingPieChart";
 import WarningTable from "@/components/charts/WarningTable";
 import ChargeCard from "@/components/ChargeCard";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { time } from "console";
+import dayjs from "dayjs";
 // import { useEffect } from "react";
 // import autofit from "autofit.js";
 
@@ -76,6 +78,19 @@ export default function BigScreen() {
 }
 
 function HeadArea() {
+
+  const [currentTime, setCurrentTime] = useState<string>()
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const date = new Date()
+      setCurrentTime(`${dayjs().format('YYYY-MM-DD HH:mm:ss')}`)
+    }, 1000)
+    return () => {
+      clearInterval(timer)
+    }
+  }, [])
+
   return (
     <div className="flex flex-row bg-[#33333333] h-[3.5625rem] mt-2 mx-3.5 text-center">
       <div className="flex flex-row w-[66.8125rem] bg-[url('/top_head.svg')] bg-bottom bg-no-repeat">
@@ -95,23 +110,23 @@ function HeadArea() {
       {/**
        * TODO: 排版有问题，需要调整
        */}
-      <div className="flex flex-row grow">
-        <div>
+      <div className="flex flex-row grow space-x-[84px]">
+        <div className="flex flex-col justify-end mb-3">
           <DropDownButton icon={LocationIcon} text={"中国（98/106）"} />
         </div>
-        <div>
+        <div className="flex flex-col justify-end mb-3">
           <DropDownButton icon={UserIcon} text={"管理员"} />
         </div>
-        <div>
+        <div className="flex flex-col justify-end mb-2">
           <GeneralButton
-            customStyle="text-white bg-[#2E8BFFFF] px-4 py-1.5 rounded-2xl"
+            customStyle="text-white bg-[#2E8BFFFF] px-4 py-1.5 rounded-2xl w-[96px] h-[34px]"
             text={"生成报表"}
           />
         </div>
       </div>
       <div className="flex w-[16.6875rem] bg-[url('/top_time_bg.svg')] bg-bottom bg-no-repeat mr-2.5">
         <div className="flex w-full justify-end justify-items-center items-center mr-2.5 mt-4">
-          <span className="font-medium">2025.01.03 09:00</span>
+          <span className="font-medium">{currentTime}</span>
         </div>
       </div>
     </div>
