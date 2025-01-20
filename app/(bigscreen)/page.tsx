@@ -6,6 +6,10 @@ import Logo from "@/public/logo_icon.png";
 import SplitLine from "@/public/split.svg";
 import DropDownButton from "@/components/buttons/DropDownButton";
 import LocationIcon from "@/public/ico_loc.svg";
+import BaseStationIcon from "@/public/ico_count_basestation.svg";
+import CameraIcon from "@/public/ico_count_camera.svg";
+import ControlIcon from "@/public/ico_count_control.svg";
+import OthersIcon from "@/public/ico_count_other.svg";
 import UserIcon from "@/public/ico_user.svg";
 
 import GeneralButton from "@/components/buttons/GeneralButton";
@@ -18,7 +22,6 @@ import RingPieChart from "@/components/charts/RingPieChart";
 import WarningTable from "@/components/charts/WarningTable";
 import ChargeCard from "@/components/ChargeCard";
 import { useEffect, useState } from "react";
-import { time } from "console";
 import dayjs from "dayjs";
 // import { useEffect } from "react";
 // import autofit from "autofit.js";
@@ -78,18 +81,17 @@ export default function BigScreen() {
 }
 
 function HeadArea() {
-
-  const [currentTime, setCurrentTime] = useState<string>()
+  const [currentTime, setCurrentTime] = useState<string>();
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const date = new Date()
-      setCurrentTime(`${dayjs().format('YYYY-MM-DD HH:mm:ss')}`)
-    }, 1000)
+      const date = new Date();
+      setCurrentTime(`${dayjs(date).format("YYYY-MM-DD HH:mm:ss")}`);
+    }, 1000);
     return () => {
-      clearInterval(timer)
-    }
-  }, [])
+      clearInterval(timer);
+    };
+  }, []);
 
   return (
     <div className="flex flex-row bg-[#33333333] h-[3.5625rem] mt-2 mx-3.5 text-center">
@@ -137,28 +139,28 @@ function ObjectStatisticsArea() {
   return (
     <div className="flex flex-col bg-[#33333333] w-full h-60 text-center">
       <AreaTitle title="对象统计" />
-      <div className="flex flex-row">
-        <div className="flex flex-col">
+      <div className="flex flex-row ml-5 mt-9 space-x-28">
+        <div className="flex flex-col space-y-8">
           <ObjectStatisticsCard
-            icon={LocationIcon}
+            icon={BaseStationIcon}
             label="基站总数量"
             value={100}
           />
           <ObjectStatisticsCard
-            icon={LocationIcon}
+            icon={CameraIcon}
             label="摄像头总数量"
             value={100}
           />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col space-y-8">
           <ObjectStatisticsCard
-            icon={LocationIcon}
-            label="基站总数量"
+            icon={ControlIcon}
+            label="计量控制设备总数量"
             value={100}
           />
           <ObjectStatisticsCard
-            icon={LocationIcon}
-            label="摄像头总数量"
+            icon={OthersIcon}
+            label="其他设备总数量"
             value={100}
           />
         </div>

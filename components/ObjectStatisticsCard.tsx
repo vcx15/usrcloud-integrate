@@ -16,8 +16,8 @@ export default function ObjectStatisticsCard({
         <Image src={icon} alt="" />
       </div>
       <div className="flex flex-col">
-        <span>{value}</span>
-        <span>{label}</span>
+        <span className="flex text-[#0061DBFF] font-semibold text-[22px] leading-7">{value}</span>
+        <span className="flex text-[##555555FF] font-medium text-[12px] leading-4">{label}</span>
       </div>
     </div>
   );
