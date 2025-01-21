@@ -1,3 +1,6 @@
+import { get } from "./cache.service";
+import { Province } from "./entities";
+
 // Configuration
 const API_URL =
   process.env.API_URL ||
@@ -19,5 +22,83 @@ export const fetchUserToken = async (): Promise<string> => {
   });
 
   const data = await response.json();
-  return JSON.stringify(data);
+  return data.data["X-Access-Token"];
 };
+
+export class UserService {
+  public static async getUser() {
+    const token = await get("token")
+
+    const response = await fetch(
+      "https://openapi.mp.usr.cn/usrCloud/V6/user/getUser",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          account: "4m02mir9"
+        }),
+      }
+    )
+
+    const data = await response.json();
+    return data;
+  }
+}
+
+export class OrgService {
+  public static async getProvinceList(): Promise<Array<Province>> {
+    const token = await get("token")
+
+    const user = await UserService.getUser()
+    const rootOrgId = user['data']['projectId']
+
+    const response = await fetch(
+      "https://openapi.mp.usr.cn/usrCloud/V6/organization/queryOrganizationList",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          isTree: 1
+        }),
+      }
+    )
+
+    const data = await response.json();
+    const provinceList = (data['data'].filter((item: any) => item['id'] === rootOrgId) as Array<any>).at(0).children.map((item: any) => {
+      return {
+        id: item['id'],
+        name: item['projectName']
+      } as Province
+    })
+    return provinceList;
+  }
+}
+
+export class DataService {
+  public static async getBaseStationCount() {
+    const token = await get("token")
+
+    const response = await fetch(
+      "https://openapi.mp.usr.cn/usrCloud/V6/data/count/baseStation",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          projectId: "4m02mir9"
+        }),
+      }
+    )
+
+    const data = await response.json();
+    return data;
+  }
+}

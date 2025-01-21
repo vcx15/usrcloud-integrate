@@ -94,7 +94,7 @@ function HeadArea() {
   }, []);
 
   return (
-    <div className="flex flex-row bg-[#33333333] h-[3.5625rem] mt-2 mx-3.5 text-center">
+    <div className="flex flex-row h-[3.5625rem] mt-2 mx-3.5 text-center">
       <div className="flex flex-row w-[66.8125rem] bg-[url('/top_head.svg')] bg-bottom bg-no-repeat">
         <div className="flex ml-1 mb-2">
           <Image src={Logo} alt="logo" />
@@ -137,7 +137,7 @@ function HeadArea() {
 
 function ObjectStatisticsArea() {
   return (
-    <div className="flex flex-col bg-[#33333333] w-full h-60 text-center">
+    <div className="flex flex-col  w-full h-60 text-center">
       <AreaTitle title="对象统计" />
       <div className="flex flex-row ml-5 mt-9 space-x-28">
         <div className="flex flex-col space-y-8">
@@ -171,7 +171,7 @@ function ObjectStatisticsArea() {
 
 function EnergyConsumeArea() {
   return (
-    <div className="flex flex-col bg-[#33333333] w-full h-[22.5rem] text-center">
+    <div className="flex flex-col  w-full h-[22.5rem] text-center">
       <AreaTitle title="运营商能耗" />
       <div className="h-full">
         <BarWithBackgroundChart />
@@ -181,7 +181,7 @@ function EnergyConsumeArea() {
 }
 function OrgEnergyConsumeArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
+    <div className=" w-full h-[22.0625rem] text-center">
       <AreaTitle title="组织内能耗" />
       <div className="h-full">
         <OrgEnergyBar />
@@ -192,7 +192,7 @@ function OrgEnergyConsumeArea() {
 
 function MapArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[43.8125rem] text-center">
+    <div className=" w-full h-[43.8125rem] text-center">
       <MapChart />
     </div>
   );
@@ -200,7 +200,7 @@ function MapArea() {
 
 function TrendArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[16.75rem] text-center">
+    <div className=" w-full h-[16.75rem] text-center">
       <div className="h-full">
         <AreaChart />
       </div>
@@ -210,7 +210,7 @@ function TrendArea() {
 
 function RatioArea() {
   return (
-    <div className="bg-[#33333333] w-full h-60 text-center">
+    <div className=" w-full h-60 text-center">
       <AreaTitle title="运营商能耗分摊占比" />
       <div className="flex flex-row h-full">
         <div className="w-[30%] h-full">
@@ -222,7 +222,7 @@ function RatioArea() {
 }
 function WarningArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[22.5rem] text-center">
+    <div className=" w-full h-[22.5rem] text-center">
       <AreaTitle title="实时告警" />
       <WarningTable />
     </div>
@@ -230,7 +230,7 @@ function WarningArea() {
 }
 function BillArea() {
   return (
-    <div className="bg-[#33333333] w-full h-[22.0625rem] text-center">
+    <div className=" w-full h-[22.0625rem] text-center">
       <AreaTitle title="电费" />
       <ChargeCard />
     </div>
