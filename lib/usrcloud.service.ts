@@ -26,6 +26,26 @@ export const fetchUserToken = async (): Promise<string> => {
   return data.data["X-Access-Token"];
 };
 
+export const fetchDataHistoryServerAddress = async (): Promise<string> => {
+  const token = await get("token");
+
+  const response = await fetch(
+    "https://openapi.mp.usr.cn/usrCloud/V6/ucloudSdk/getHistoryServerAddress",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Token": token,
+      },
+      body: JSON.stringify({}),
+    }
+  );
+
+  const result = await response.json();
+
+  return result["data"]["historyServerAddr"];
+};
+
 export class UserService {
   public static async getUser() {
     const token = await get("token");
@@ -207,24 +227,113 @@ export class DataService {
       console.log("PAGE DATA", pageData);
       dataPointList.push(...pageData["data"]["cusdeviceDataPointList"]);
     }
-    console.log("DATA POINT LIST", dataPointList);
-    console.log(
-      "DATA POINT LIST FILTER",
-      dataPointList.filter((item: any) =>
-        (item["name"] as string).endsWith("总电能")
-      )
-    );
-    console.log(
-      "DATA POINT LIST MAP",
-      dataPointList.map((item: any) => item["name"] as string)
-    );
+    // console.log("DATA POINT LIST", dataPointList);
+    // console.log(
+    //   "DATA POINT LIST FILTER",
+    //   dataPointList.filter((item: any) =>
+    //     (item["name"] as string).endsWith("总电能")
+    //   )
+    // );
+    // console.log(
+    //   "DATA POINT LIST MAP",
+    //   dataPointList.map((item: any) => item["name"] as string)
+    // );
     return dataPointList
       .filter((item: any) => (item["name"] as string).endsWith("总电能"))
       .map((item: any) => {
         return {
           id: item["dataPointRelId"],
+          deviceId: cusDeviceId,
           name: item["name"],
         };
       });
+  }
+
+  public static async getTotalElectricalPowerGroupByOperator(
+    projectId: string
+  ): Promise<any> {
+    // 1. 通过projectId查询所有的设备
+    const token = await get("token");
+
+    const response = await fetch(
+      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          projectId: projectId,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
+      (item: any) => {
+        return {
+          id: item["cusdeviceNo"],
+          name: item["cusdeviceName"],
+        };
+      }
+    );
+
+    // 2. 通过cusDeviceId查询所有的数据点
+    const deviceDataList = [];
+    for (const device of deviceList) {
+      const datapointList = await this.getTotalDatapointList(device.id);
+
+      const historyServerAddress = await fetchDataHistoryServerAddress();
+      console.log("HISTORY SERVER ADDRESS", historyServerAddress);
+      // 获取该设备的最新数据
+
+      console.log("DATAPONT LIST", datapointList);
+      const response = await fetch(
+        `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Access-Token": await get("token"),
+          },
+          body: JSON.stringify({
+            dataPoints: datapointList.map((item: any) => {
+              return {
+                cusdeviceNo: item.deviceId,
+                dataPointId: item.id,
+              };
+            }),
+          }),
+        }
+      );
+
+      const result = await response.json();
+      console.log("RESULT", result);
+
+      const finalData = result["data"]["list"].map(
+        (item: any) => {
+          return {
+            datapointId: item["dataPointId"],
+            variableName: item["variableName"],
+            deviceId: item["cusdeviceNo"],
+            deviceName: item["cusdeviceName"],
+            dataValue: item["value"],
+          };
+        }
+      );
+
+      console.log("FINAL DATA", finalData);
+      deviceDataList.push(...finalData)
+    }
+
+    console.log("deviceDataMap", deviceDataList);
+    return deviceDataList;
+
+    // // 按运营商分组计算总量
+    // for (const deviceData of deviceDataMap) {
+    //   console.log("DEVICE DATA", deviceData);
+    // }
   }
 }
