@@ -10,7 +10,7 @@ export async function GET(
   const projectId = "323324";
 
   // 2. 获取用户信息
-  const result = await DataService.getElectricalPowerGroupBySubOrg(
+  const result = await DataService.getElectricChargeGroupByOperator(
     projectId,
     "lastMonth"
   );
