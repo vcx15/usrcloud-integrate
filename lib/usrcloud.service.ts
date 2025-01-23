@@ -131,7 +131,7 @@ export class OrgService {
     console.log("DATA LIST", data["data"]["list"])
 
     const subOrgList = (
-      data["data"]["list"].filter((item: any) => item["parentId"] === projectId) as Array<any>
+      data["data"]["list"].filter((item: any) => item["parentId"] === parseInt(projectId)) as Array<any>
     ).map((item: any) => {
       return {
         id: item["id"],
