@@ -9,7 +9,7 @@ const API_URL =
 const APP_KEY = process.env.APP_KEY || "JzihOBti";
 const APP_SECRET = process.env.APP_SECRET || "edc919p2md2afinboc4r29k06y284eck";
 
-const dataServerUrl = "https://history.usr.cn:7002"
+const dataServerUrl = "https://history.usr.cn:7002";
 
 // Function to fetch user token
 export const fetchUserToken = async (): Promise<string> => {
@@ -128,16 +128,18 @@ export class OrgService {
 
     const data = await response.json();
 
-    console.log("DATA LIST", data["data"]["list"])
+    console.log("DATA LIST", data["data"]["list"]);
 
     const subOrgList = (
-      data["data"]["list"].filter((item: any) => (item["parentId"]).toString() === projectId) as Array<any>
+      data["data"]["list"].filter(
+        (item: any) => item["parentId"].toString() === projectId
+      ) as Array<any>
     ).map((item: any) => {
       return {
         id: item["id"],
         name: item["projectName"],
-      }
-    })
+      };
+    });
     return subOrgList;
   }
 }
@@ -258,8 +260,8 @@ export class DataService {
           },
           body: JSON.stringify({
             cusdeviceNo: cusDeviceId,
-            pageNo: dataPointList.length / 50 + 1,
-            pageSize: 50,
+            pageNo: dataPointList.length / 500 + 1,
+            pageSize: 500,
           }),
         }
       );
@@ -278,7 +280,7 @@ export class DataService {
     //   "DATA POINT LIST MAP",
     //   dataPointList.map((item: any) => item["name"] as string)
     // );
-    let endString = "总电能"
+    let endString = "总电能";
     switch (type) {
       case "total":
         endString = "总电能";
@@ -387,6 +389,10 @@ export class DataService {
     let chinaUnicomData = 0;
     let chinaTelecomData = 0;
     let guangdianData = 0;
+    let zhilianData = 0;
+    let nengyuanData = 0;
+    let tietaData = 0;
+    let noTenantData = 0;
     for (const deviceData of deviceDataList) {
       // console.log("DEVICE DATA", deviceData);
       if ((deviceData["variableName"] as string).includes("移动")) {
@@ -401,113 +407,236 @@ export class DataService {
       if ((deviceData["variableName"] as string).includes("广电")) {
         guangdianData += parseFloat(deviceData["dataValue"]);
       }
+      if ((deviceData["variableName"] as string).includes("智联")) {
+        zhilianData += parseFloat(deviceData["dataValue"]);
+      }
+      if ((deviceData["variableName"] as string).includes("能源")) {
+        nengyuanData += parseFloat(deviceData["dataValue"]);
+      }
+      if ((deviceData["variableName"] as string).includes("铁塔")) {
+        tietaData += parseFloat(deviceData["dataValue"]);
+      }
+      if ((deviceData["variableName"] as string).includes("无租户")) {
+        noTenantData += parseFloat(deviceData["dataValue"]);
+      }
     }
 
-    return [chinaMobileData, chinaUnicomData, chinaTelecomData, guangdianData];
+    return [
+      chinaMobileData.toFixed(2),
+      chinaUnicomData.toFixed(2),
+      chinaTelecomData.toFixed(2),
+      guangdianData.toFixed(2),
+      zhilianData.toFixed(2),
+      nengyuanData.toFixed(2),
+      tietaData.toFixed(2),
+      noTenantData.toFixed(2),
+    ];
   }
 
-  public static async getElectricalPowerGroupByLowerLevelOrg(
+  public static async getElectricalPowerGroupBySubOrg(
     projectId: string,
     type: string
   ): Promise<any> {
-    // 1. 通过projectId查询所有的设备
     const token = await get("token");
+    // 1. 通过projectId查询下级组织列表
+    const subOrgList = await OrgService.getSubOrg(projectId);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          projectId: projectId,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
-      (item: any) => {
-        return {
-          id: item["cusdeviceNo"],
-          name: item["cusdeviceName"],
-        };
-      }
-    );
-
-    // 2. 通过cusDeviceId查询所有的数据点
-    const deviceDataList = [];
-    for (const device of deviceList) {
-      const datapointList = await this.getDatapointList(device.id, type);
-
-      const historyServerAddress = dataServerUrl;
-      console.log("HISTORY SERVER ADDRESS", historyServerAddress);
-      // 获取该设备的最新数据
-
-      console.log("DATAPONT LIST", datapointList);
+    const allDeviceDataList = [];
+    for (const subOrg of subOrgList) {
+      // 2.a. 通过projectId查询所有的设备
       const response = await fetch(
-        `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+        "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Access-Token": await get("token"),
+            "X-Access-Token": token,
           },
           body: JSON.stringify({
-            dataPoints: datapointList.map((item: any) => {
-              return {
-                cusdeviceNo: item.deviceId,
-                dataPointId: item.id,
-              };
-            }),
+            projectId: subOrg.id,
           }),
         }
       );
 
-      const result = await response.json();
-      console.log("RESULT", result);
+      const data = await response.json();
 
-      const finalData = result["data"]["list"].map((item: any) => {
+      const deviceList = (
+        data["data"]["cusdeviceResponseDTO"] as Array<any>
+      ).map((item: any) => {
         return {
-          datapointId: item["dataPointId"],
-          variableName: item["variableName"],
-          deviceId: item["cusdeviceNo"],
-          deviceName: item["cusdeviceName"],
-          dataValue: item["value"],
+          id: item["cusdeviceNo"],
+          name: item["cusdeviceName"],
         };
       });
 
-      console.log("FINAL DATA", finalData);
-      deviceDataList.push(...finalData);
+      // 2. 通过cusDeviceId查询所有的数据点
+      const deviceDataList = [];
+      for (const device of deviceList) {
+        const datapointList = await this.getDatapointList(device.id, type);
+
+        const historyServerAddress = dataServerUrl;
+        console.log("HISTORY SERVER ADDRESS", historyServerAddress);
+        // 获取该设备的最新数据
+
+        console.log("DATAPONT LIST", datapointList);
+        const response = await fetch(
+          `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Access-Token": await get("token"),
+            },
+            body: JSON.stringify({
+              dataPoints: datapointList.map((item: any) => {
+                return {
+                  cusdeviceNo: item.deviceId,
+                  dataPointId: item.id,
+                };
+              }),
+            }),
+          }
+        );
+
+        const result = await response.json();
+        console.log("RESULT", result);
+
+        const finalData = result["data"]["list"].map((item: any) => {
+          return {
+            projectId: subOrg.id,
+            datapointId: item["dataPointId"],
+            variableName: item["variableName"],
+            deviceId: item["cusdeviceNo"],
+            deviceName: item["cusdeviceName"],
+            dataValue: item["value"],
+          };
+        });
+
+        console.log("FINAL DATA", finalData);
+        deviceDataList.push(...finalData);
+      }
+      allDeviceDataList.push(...deviceDataList);
     }
 
-    console.log("deviceDataMap", deviceDataList);
-    // return deviceDataList;
+    // return allDeviceDataList;
+    // 按subOrgId分组统计总量
+    const resultList = [];
+    for (const org of subOrgList) {
+      const result = allDeviceDataList
+        .filter((deviceData) => deviceData.projectId === org.id)
+        .reduce((result, deviceData) => {
+          if (!result[deviceData.projectId]) {
+            result[deviceData.projectId] = 0;
+          }
+          result[deviceData.projectId] += parseFloat(deviceData.dataValue);
+          return result;
+        });
 
-    // 按运营商分组计算总量
-    let chinaMobileData = 0;
-    let chinaUnicomData = 0;
-    let chinaTelecomData = 0;
-    let guangdianData = 0;
-    for (const deviceData of deviceDataList) {
-      // console.log("DEVICE DATA", deviceData);
-      if ((deviceData["variableName"] as string).includes("移动")) {
-        chinaMobileData += parseFloat(deviceData["dataValue"]);
-      }
-      if ((deviceData["variableName"] as string).includes("联通")) {
-        chinaUnicomData += parseFloat(deviceData["dataValue"]);
-      }
-      if ((deviceData["variableName"] as string).includes("电信")) {
-        chinaTelecomData += parseFloat(deviceData["dataValue"]);
-      }
-      if ((deviceData["variableName"] as string).includes("广电")) {
-        guangdianData += parseFloat(deviceData["dataValue"]);
-      }
+      resultList.push({
+        id: org.id,
+        result: result,
+      });
     }
 
-    return [chinaMobileData, chinaUnicomData, chinaTelecomData, guangdianData];
+    return resultList;
+
+    // // 1. 通过projectId查询所有的设备
+
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       projectId: projectId,
+    //     }),
+    //   }
+    // );
+
+    // const data = await response.json();
+
+    // const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
+    //   (item: any) => {
+    //     return {
+    //       id: item["cusdeviceNo"],
+    //       name: item["cusdeviceName"],
+    //     };
+    //   }
+    // );
+
+    // // 2. 通过cusDeviceId查询所有的数据点
+    // const deviceDataList = [];
+    // for (const device of deviceList) {
+    //   const datapointList = await this.getDatapointList(device.id, type);
+
+    //   const historyServerAddress = dataServerUrl;
+    //   console.log("HISTORY SERVER ADDRESS", historyServerAddress);
+    //   // 获取该设备的最新数据
+
+    //   console.log("DATAPONT LIST", datapointList);
+    //   const response = await fetch(
+    //     `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "X-Access-Token": await get("token"),
+    //       },
+    //       body: JSON.stringify({
+    //         dataPoints: datapointList.map((item: any) => {
+    //           return {
+    //             cusdeviceNo: item.deviceId,
+    //             dataPointId: item.id,
+    //           };
+    //         }),
+    //       }),
+    //     }
+    //   );
+
+    //   const result = await response.json();
+    //   console.log("RESULT", result);
+
+    //   const finalData = result["data"]["list"].map((item: any) => {
+    //     return {
+    //       datapointId: item["dataPointId"],
+    //       variableName: item["variableName"],
+    //       deviceId: item["cusdeviceNo"],
+    //       deviceName: item["cusdeviceName"],
+    //       dataValue: item["value"],
+    //     };
+    //   });
+
+    //   console.log("FINAL DATA", finalData);
+    //   deviceDataList.push(...finalData);
+    // }
+
+    // console.log("deviceDataMap", deviceDataList);
+    // // return deviceDataList;
+
+    // // 按运营商分组计算总量
+    // let chinaMobileData = 0;
+    // let chinaUnicomData = 0;
+    // let chinaTelecomData = 0;
+    // let guangdianData = 0;
+    // for (const deviceData of deviceDataList) {
+    //   // console.log("DEVICE DATA", deviceData);
+    //   if ((deviceData["variableName"] as string).includes("移动")) {
+    //     chinaMobileData += parseFloat(deviceData["dataValue"]);
+    //   }
+    //   if ((deviceData["variableName"] as string).includes("联通")) {
+    //     chinaUnicomData += parseFloat(deviceData["dataValue"]);
+    //   }
+    //   if ((deviceData["variableName"] as string).includes("电信")) {
+    //     chinaTelecomData += parseFloat(deviceData["dataValue"]);
+    //   }
+    //   if ((deviceData["variableName"] as string).includes("广电")) {
+    //     guangdianData += parseFloat(deviceData["dataValue"]);
+    //   }
+    // }
+
+    // return [chinaMobileData, chinaUnicomData, chinaTelecomData, guangdianData];
   }
 }

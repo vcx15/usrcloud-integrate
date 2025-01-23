@@ -7,12 +7,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   // 1. 获取Token
-  const projectId = "364002";
+  const projectId = "323324";
 
   // 2. 获取用户信息
-  const result = await DataService.getElectricalPowerGroupByOperator(
+  const result = await DataService.getElectricalPowerGroupBySubOrg(
     projectId,
-    "total"
+    "lastMonth"
   );
 
   // const result = await fetch("https://echarts.apache.org/examples/data/asset/geo/HK.json", {
