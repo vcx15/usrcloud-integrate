@@ -2,7 +2,7 @@ import { useState } from "react";
 import TabButton from "./buttons/TabButton";
 
 export default function Tab({ tabButtonList }: { tabButtonList: Array<any> }) {
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<string>(tabButtonList.at(0).key);
 
   return (
     <div className="flex flex-row mt-2.5 space-x-4 mr-8">

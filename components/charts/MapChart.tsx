@@ -3,16 +3,18 @@ import { useEffect, useState } from "react";
 // import geoJson from "@/public/map/cn.json"
 import { GeoJSONSourceInput } from "echarts/types/src/coord/geo/geoTypes.js";
 import Chart from "./Chart";
+import getAdcodeByProjectId from "@/lib/utils";
 
-export default function MapChart() {
+export default function MapChart({ projectId }: { projectId: string }) {
   const [geoJson, setGeoJson] = useState<any>();
   const [options, setOptions] = useState<any>({});
+
   useEffect(() => {
-    fetch("/api/map", {
+    fetch(`/api/project/${projectId}/map`, {
       method: "GET",
     })
       .then(async (res) => {
-        registerMap("HK", (await res.json()) as GeoJSONSourceInput);
+        registerMap("map", (await res.json()) as GeoJSONSourceInput);
       })
       .finally(() => {
         setOptions({
@@ -27,7 +29,7 @@ export default function MapChart() {
             formatter: "{b}<br/>{c} (p / km2)",
           },
           geo: {
-            map: "HK",
+            map: "map",
             itemStyle: {
               normal: {
                 shadowColor: "rgba(0, 0, 0, 0.5)", // 阴影颜色
@@ -62,7 +64,7 @@ export default function MapChart() {
             {
               name: "香港18区人口密度",
               type: "map",
-              map: "HK",
+              map: "map",
               label: {
                 show: true,
               },

@@ -6,6 +6,7 @@ import Logo from "@/public/logo_icon.png";
 import SplitLine from "@/public/split.svg";
 import DropDownButton from "@/components/buttons/DropDownButton";
 import LocationIcon from "@/public/ico_loc.svg";
+import LocationFillIcon from "@/public/ico_loc_fill.svg";
 import BaseStationIcon from "@/public/ico_count_basestation.svg";
 import CameraIcon from "@/public/ico_count_camera.svg";
 import ControlIcon from "@/public/ico_count_control.svg";
@@ -24,6 +25,7 @@ import ChargeCard from "@/components/ChargeCard";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Tab from "@/components/Tab";
+import RatioCard from "@/components/RatioCard";
 // import { useEffect } from "react";
 // import autofit from "autofit.js";
 
@@ -271,8 +273,18 @@ function OrgEnergyConsumeArea() {
 
 function MapArea() {
   return (
-    <div className="flex w-full h-[43.8125rem] text-center bg-[#33333333]">
-      <MapChart />
+    <div className="flex flex-col w-full h-[43.8125rem] text-center bg-[#33333333]">
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-row">
+          <Image src={LocationFillIcon} alt="" />
+          <span>中国</span>
+        </div>
+        <div className="flex flex-col">
+          <div>组织总能耗</div>
+          <div>12345 KW·h</div>
+        </div>
+      </div>
+      <MapChart projectId="323324" />
     </div>
   );
 }
@@ -280,6 +292,22 @@ function MapArea() {
 function TrendArea() {
   return (
     <div className="flex flex-col w-full h-[16.75rem] text-center bg-[#33333333]">
+      <div className="flex flex-row justify-end">
+        <Tab
+          tabButtonList={[
+            {
+              key: "yesterday",
+              action: () => {},
+              buttonName: "昨日",
+            },
+            {
+              key: "today",
+              action: () => {},
+              buttonName: "今日",
+            },
+          ]}
+        />
+      </div>
       <div className="h-full">
         <AreaChart />
       </div>
@@ -295,7 +323,64 @@ function RatioArea() {
         <div className="w-[30%] h-full">
           <RingPieChart />
         </div>
-        <div className="flex h-full w-[70%] bg-slate-400"></div>
+        <div className="flex flex-col h-full w-[70%] bg-slate-400">
+          <div className="flex flex-row justify-between mx-auto">
+            <RatioCard
+              color={"bg-[#4DC0FCFF]"}
+              name={"移动"}
+              value={"700"}
+              ratio={"40"}
+            />
+            <RatioCard
+              color={"bg-[#F84446FF]"}
+              name={"联通"}
+              value={"700"}
+              ratio={"40"}
+            />
+          </div>
+          <div className="flex flex-row justify-between mx-auto">
+            <RatioCard
+              color={"bg-[#5676FCFF]"}
+              name={"电信"}
+              value={"700"}
+              ratio={"40"}
+            />
+            <RatioCard
+              color={"bg-[#FB9020FF]"}
+              name={"广电"}
+              value={"700"}
+              ratio={"40"}
+            />
+          </div>
+          <div className="flex flex-row justify-between mx-auto">
+            <RatioCard
+              color={"bg-[#4DC0FCFF]"}
+              name={"铁塔"}
+              value={"700"}
+              ratio={"40"}
+            />
+            <RatioCard
+              color={"bg-[#F84446FF]"}
+              name={"智联"}
+              value={"700"}
+              ratio={"40"}
+            />
+          </div>
+          <div className="flex flex-row justify-between mx-auto">
+            <RatioCard
+              color={"bg-[#5676FCFF]"}
+              name={"能源"}
+              value={"700"}
+              ratio={"40"}
+            />
+            <RatioCard
+              color={"bg-[#FB9020FF]"}
+              name={"无租户"}
+              value={"700"}
+              ratio={"40"}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -312,6 +397,9 @@ function BillArea() {
   return (
     <div className="flex flex-col w-full h-[22.0625rem] text-center bg-[#33333333]">
       <AreaTitle title="电费" />
+      <div className="flex ml-8">
+        <span className="mt-6">单位：元</span>
+      </div>
       <ChargeCard />
     </div>
   );
