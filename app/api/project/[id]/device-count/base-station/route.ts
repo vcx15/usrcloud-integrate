@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // 1. 获取Token
   // const token = await get("token");
-  const projectId = params.id;
+  const projectId = (await params).id;
 
   // 2. 获取用户信息
   const baseStationCount = await DeviceService.getBaseStationCount(projectId);

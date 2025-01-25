@@ -1,17 +1,24 @@
 import Chart from "./Chart";
 
-export default function BarWithBackgroundChart() {
+export default function BarWithBackgroundChart({
+  data,
+  type,
+}: {
+  data: Array<number>;
+  type: string;
+}) {
   const options = {
     xAxis: {
       type: "category",
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: ["移动", "电信", "联通", "广电", "智联", "能源", "铁塔", "其他"],
     },
     yAxis: {
       type: "value",
+      name: "单位：kW·h",
     },
     series: [
       {
-        data: [200, 200, 200, 200, 200, 200, 200],
+        data: Array(8).fill(Math.max(...data)),
         type: "pictorialBar",
         symbol: "rect",
         barWidth: "60%", // 设置柱体宽度
@@ -21,7 +28,7 @@ export default function BarWithBackgroundChart() {
         z: -1, // 设置柱体层级，使得背景在柱体下方
       },
       {
-        data: [120, 200, 150, 80, 70, 110, 130],
+        data: data,
         type: "bar",
         barWidth: "20%", // 设置柱体宽度
         itemStyle: {
@@ -46,5 +53,5 @@ export default function BarWithBackgroundChart() {
     ],
   };
 
-  return <Chart options={options}></Chart>;
+  return <Chart options={options} id={type}></Chart>;
 }

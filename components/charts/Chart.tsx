@@ -25,9 +25,10 @@ echarts.use([
 type Prop = {
   onChartClick?: () => boolean | void;
   options: echarts.EChartsCoreOption;
+  id?: string;
 };
 
-function Chart({ options }: Prop) {
+function Chart({ options, id }: Prop) {
   const chartRef = useRef<HTMLDivElement>(null);
   let chartInstance: echarts.ECharts;
 
@@ -61,6 +62,7 @@ function Chart({ options }: Prop) {
 
   // 页面初始化时，开始渲染图表
   useEffect(() => {
+    console.log("render")
     renderChart();
     // onChartRef(chartRef)
 
@@ -71,7 +73,7 @@ function Chart({ options }: Prop) {
       }
     };
     // eslint-disable-next-line
-  }, [options]);
+  }, [options, id]);
 
   // 监听窗口大小改变
   useEffect(() => {

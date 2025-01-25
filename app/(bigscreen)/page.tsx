@@ -23,6 +23,7 @@ import WarningTable from "@/components/charts/WarningTable";
 import ChargeCard from "@/components/ChargeCard";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
+import Tab from "@/components/Tab";
 // import { useEffect } from "react";
 // import autofit from "autofit.js";
 
@@ -94,7 +95,7 @@ function HeadArea() {
   }, []);
 
   return (
-    <div className="flex flex-row h-[3.5625rem] mt-2 mx-3.5 text-center">
+    <div className="flex flex-row h-[3.5625rem] mt-2 mx-3.5 text-center bg-[#33333333]">
       <div className="flex flex-row w-[66.8125rem] bg-[url('/top_head.svg')] bg-bottom bg-no-repeat">
         <div className="flex ml-1 mb-2">
           <Image src={Logo} alt="logo" />
@@ -137,7 +138,7 @@ function HeadArea() {
 
 function ObjectStatisticsArea() {
   return (
-    <div className="flex flex-col  w-full h-60 text-center">
+    <div className="flex flex-col  w-full h-60 text-center bg-[#33333333]">
       <AreaTitle title="对象统计" />
       <div className="flex flex-row ml-5 mt-9 space-x-28">
         <div className="flex flex-col space-y-8">
@@ -170,21 +171,99 @@ function ObjectStatisticsArea() {
 }
 
 function EnergyConsumeArea() {
+  const [data, setData] = useState<Array<number>>([
+    100, 200, 700, 400, 600, 200, 100, 400,
+  ]);
+  const [type, setType] = useState<string>("lastMonth");
   return (
-    <div className="flex flex-col  w-full h-[22.5rem] text-center">
-      <AreaTitle title="运营商能耗" />
+    <div className="flex flex-col  w-full h-[22.5rem] text-center bg-[#33333333]">
+      <div className="flex flex-row justify-between">
+        <AreaTitle title="运营商能耗" />
+        <Tab
+          tabButtonList={[
+            {
+              key: "lastMonth",
+              action: () => {
+                setData([100, 200, 700, 400, 600, 200, 100, 400]);
+                setType("lastMonth");
+              },
+              buttonName: "上月",
+            },
+            {
+              key: "thisMonth",
+              action: () => {
+                setData([600, 100, 200, 500, 200, 200, 500, 800]);
+                setType("thisMonth");
+              },
+              buttonName: "本月",
+            },
+            {
+              key: "total",
+              action: () => {
+                setData([300, 200, 100, 400, 900, 700, 500, 100]);
+                setType("total");
+              },
+              buttonName: "总电能",
+            },
+          ]}
+        />
+      </div>
       <div className="h-full">
-        <BarWithBackgroundChart />
+        <BarWithBackgroundChart data={data} type={type} />
       </div>
     </div>
   );
 }
 function OrgEnergyConsumeArea() {
+  const [categories, setCategories] = useState<Array<string>>([
+    "1",
+    "2",
+    "3",
+    "4",
+    "1",
+    "2",
+    "3",
+    "4",
+  ]);
+  const [data, setData] = useState<Array<number>>([
+    100, 200, 700, 400, 600, 200, 100, 400,
+  ]);
+  const [type, setType] = useState<string>("lastMonth");
   return (
-    <div className=" w-full h-[22.0625rem] text-center">
-      <AreaTitle title="组织内能耗" />
+    <div className="flex flex-col w-full h-[22.0625rem] text-center bg-[#33333333]">
+      <div className="flex flex-row justify-between">
+        <AreaTitle title="组织内能耗" />
+        <Tab
+          tabButtonList={[
+            {
+              key: "lastMonth",
+              action: () => {
+                setData([100, 200, 700, 400, 600, 200, 100, 400]);
+                setType("lastMonth");
+              },
+              buttonName: "上月",
+            },
+            {
+              key: "thisMonth",
+              action: () => {
+                setData([600, 100, 200, 500, 200, 200, 500, 800]);
+                setType("thisMonth");
+              },
+              buttonName: "本月",
+            },
+            {
+              key: "total",
+              action: () => {
+                setData([300, 200, 100, 400, 900, 700, 500, 100]);
+                setType("total");
+              },
+              buttonName: "总电能",
+            },
+          ]}
+        />
+      </div>
       <div className="h-full">
-        <OrgEnergyBar />
+        <OrgEnergyBar categories={categories} data={data} type={type} />
       </div>
     </div>
   );
@@ -192,7 +271,7 @@ function OrgEnergyConsumeArea() {
 
 function MapArea() {
   return (
-    <div className=" w-full h-[43.8125rem] text-center">
+    <div className="flex w-full h-[43.8125rem] text-center bg-[#33333333]">
       <MapChart />
     </div>
   );
@@ -200,7 +279,7 @@ function MapArea() {
 
 function TrendArea() {
   return (
-    <div className=" w-full h-[16.75rem] text-center">
+    <div className="flex flex-col w-full h-[16.75rem] text-center bg-[#33333333]">
       <div className="h-full">
         <AreaChart />
       </div>
@@ -210,19 +289,20 @@ function TrendArea() {
 
 function RatioArea() {
   return (
-    <div className=" w-full h-60 text-center">
+    <div className="flex flex-col w-full h-60 text-center bg-[#33333333]">
       <AreaTitle title="运营商能耗分摊占比" />
       <div className="flex flex-row h-full">
         <div className="w-[30%] h-full">
           <RingPieChart />
         </div>
+        <div className="flex h-full w-[70%] bg-slate-400"></div>
       </div>
     </div>
   );
 }
 function WarningArea() {
   return (
-    <div className=" w-full h-[22.5rem] text-center">
+    <div className="flex flex-col w-full h-[22.5rem] text-center bg-[#33333333]">
       <AreaTitle title="实时告警" />
       <WarningTable />
     </div>
@@ -230,7 +310,7 @@ function WarningArea() {
 }
 function BillArea() {
   return (
-    <div className=" w-full h-[22.0625rem] text-center">
+    <div className="flex flex-col w-full h-[22.0625rem] text-center bg-[#33333333]">
       <AreaTitle title="电费" />
       <ChargeCard />
     </div>

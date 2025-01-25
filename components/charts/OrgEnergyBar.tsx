@@ -1,10 +1,18 @@
 import Chart from "./Chart";
 
-export default function OrgEnergyBar() {
+export default function OrgEnergyBar({
+  categories,
+  data,
+  type,
+}: {
+  categories: Array<string>;
+  data: Array<number>;
+  type: string;
+}) {
   const options = {
     xAxis: {
       type: "category",
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: categories,
       // boundaryGap: false // 确保柱子居中
     },
     yAxis: {
@@ -23,11 +31,8 @@ export default function OrgEnergyBar() {
       //   z: -1, // 设置柱体层级，使得背景在柱体下方
       // },
 
-
-
-
       {
-        data: [200, 200, 200, 200, 200, 200, 200],
+        data: Array(8).fill(Math.max(...data)),
         type: "bar",
         symbol: "rect",
         barWidth: "60%", // 设置柱体宽度
@@ -40,14 +45,14 @@ export default function OrgEnergyBar() {
       },
 
       {
-        data: [120, 200, 150, 80, 70, 110, 130],
+        data: data,
         type: "pictorialBar",
         symbol: "rect",
         symbolRepeat: true,
-        symbolSize: ['100%', 3],
-        symbolMargin: '35%',
+        symbolSize: ["100%", 3],
+        symbolMargin: "35%",
         symbolClip: true,
-        symbolRepeatDirection: 'start',
+        symbolRepeatDirection: "start",
         barWidth: "20%", // 设置柱体宽度
         itemStyle: {
           // borderRadius: [16, 16, 0, 0], // 设置柱体上方为圆角
@@ -58,5 +63,5 @@ export default function OrgEnergyBar() {
     ],
   };
 
-  return <Chart options={options}></Chart>;
+  return <Chart options={options} id={type}></Chart>;
 }

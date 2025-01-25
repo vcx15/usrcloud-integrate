@@ -4,15 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   // 1. 获取Token
   const projectId = "323324";
 
   // 2. 获取用户信息
-  const result = await DataService.getElectricPowerGroupByTime(
+  const result = await DataService.getElectricalPowerGroupBySubOrg(
     projectId,
-    "yesterday"
+    "lastMonth"
   );
 
   // const result = await fetch("https://echarts.apache.org/examples/data/asset/geo/HK.json", {

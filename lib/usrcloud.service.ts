@@ -555,6 +555,7 @@ export class DataService {
 
       resultList.push({
         id: org.id,
+        name: subOrgList.find((item: any) => item.id === org.id)?.name ?? "",
         result: result["total"],
       });
     }
