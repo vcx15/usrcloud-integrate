@@ -51,7 +51,7 @@ export const fetchUserToken = async (): Promise<string> => {
 
 export class UserService {
   public static async getUser() {
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/user/getUser",
@@ -74,7 +74,7 @@ export class UserService {
 
 export class OrgService {
   public static async getProvinceList(): Promise<Array<Province>> {
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const user = await UserService.getUser();
     const rootOrgId = user["data"]["projectId"];
@@ -108,7 +108,7 @@ export class OrgService {
   }
 
   public static async getSubOrg(projectId: string) {
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     // const user = await UserService.getUser();
     // const rootOrgId = user["data"]["projectId"];
@@ -148,7 +148,7 @@ export class OrgService {
 export class DeviceService {
   public static async getBaseStationCount(projectId: string): Promise<number> {
     // 基站数量
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
@@ -170,7 +170,7 @@ export class DeviceService {
 
   public static async getControllerCount(projectId: string): Promise<number> {
     // 计量控制设备数量
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
@@ -225,10 +225,11 @@ export class DataService {
   public static async getDatapointList(
     cusDeviceId: string,
     type: string,
-    category: string // 数据点分类（电费/电能）
+    category: string, // 数据点分类（电费/电能）
+    isGroupByTime?: boolean
   ): Promise<any> {
     // 运营商能耗数据点
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo",
@@ -294,15 +295,25 @@ export class DataService {
         endString = "本月" + category;
         break;
     }
-    return dataPointList
-      .filter((item: any) => (item["name"] as string).endsWith(endString))
-      .map((item: any) => {
-        return {
-          id: item["dataPointRelId"],
-          deviceId: cusDeviceId,
-          name: item["name"],
-        };
-      });
+    return isGroupByTime
+      ? dataPointList
+          .filter((item: any) => (item["name"] as string) === "直流负载总电能")
+          .map((item: any) => {
+            return {
+              id: item["dataPointRelId"],
+              deviceId: cusDeviceId,
+              name: item["name"],
+            };
+          })
+      : dataPointList
+          .filter((item: any) => (item["name"] as string).endsWith(endString))
+          .map((item: any) => {
+            return {
+              id: item["dataPointRelId"],
+              deviceId: cusDeviceId,
+              name: item["name"],
+            };
+          });
   }
 
   public static async getElectricalPowerGroupByOperator(
@@ -310,7 +321,7 @@ export class DataService {
     type: string
   ): Promise<any> {
     // 1. 通过projectId查询所有的设备
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
@@ -357,7 +368,7 @@ export class DataService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Access-Token": await get("token"),
+            "X-Access-Token": await get("token", fetchUserToken),
           },
           body: JSON.stringify({
             dataPoints: datapointList.map((item: any) => {
@@ -443,7 +454,7 @@ export class DataService {
     projectId: string,
     type: string
   ): Promise<any> {
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
     // 1. 通过projectId查询下级组织列表
     const subOrgList = await OrgService.getSubOrg(projectId);
 
@@ -495,7 +506,7 @@ export class DataService {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-Access-Token": await get("token"),
+              "X-Access-Token": await get("token", fetchUserToken),
             },
             body: JSON.stringify({
               dataPoints: datapointList.map((item: any) => {
@@ -556,7 +567,7 @@ export class DataService {
     type: string
   ): Promise<any> {
     // 1. 通过projectId查询所有的设备
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
@@ -603,7 +614,7 @@ export class DataService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Access-Token": await get("token"),
+            "X-Access-Token": await get("token", fetchUserToken),
           },
           body: JSON.stringify({
             dataPoints: datapointList.map((item: any) => {
@@ -685,17 +696,182 @@ export class DataService {
     ];
   }
 
-  public static async getElectricPowerGroupByDate(
+  public static async getElectricPowerGroupByTime(
     projectId: string,
     type: string
-  ) {}
+  ) {
+    // 1. 通过projectId查询所有的设备
+    const token = await get("token", fetchUserToken);
+
+    const response = await fetch(
+      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          projectId: projectId,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
+      (item: any) => {
+        return {
+          id: item["cusdeviceNo"],
+          name: item["cusdeviceName"],
+        };
+      }
+    );
+
+    // 确定历史数据范围
+    const yesterdayStart = dayjs()
+      .hour(0)
+      .minute(0)
+      .second(0)
+      .add(-1, "day")
+      .valueOf();
+    const yesterdayEnd = dayjs().hour(0).minute(0).second(0).valueOf();
+    const todayEnd = dayjs()
+      .hour(0)
+      .minute(0)
+      .second(0)
+      .add(1, "day")
+      .valueOf();
+
+    const deviceDataList = [];
+    for (const device of deviceList) {
+      const datapointList = await this.getDatapointList(
+        device.id,
+        "",
+        "",
+        true
+      );
+
+      console.log("DATALIST", datapointList);
+
+      const historyServerAddress = dataServerUrl;
+      console.log("HISTORY SERVER ADDRESS", historyServerAddress);
+
+      // 获取该设备的历史数据
+      const response = await fetch(
+        `${historyServerAddress}/history/cusdevice/dataPoint`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Access-Token": await get("token", fetchUserToken),
+          },
+          body: JSON.stringify({
+            start: type === "yesterday" ? yesterdayStart : yesterdayEnd,
+            end: type === "yesterday" ? yesterdayEnd : todayEnd,
+            pageNo: 1,
+            pageSize: 500,
+            dataPoints: datapointList.map((item: any) => {
+              return {
+                cusdeviceNo: item.deviceId,
+                dataPointId: item.id,
+              };
+            }),
+          }),
+        }
+      );
+
+      const resultData = await response.json();
+      console.log("RESULT", resultData);
+
+      deviceDataList.push(...resultData["data"]["list"]);
+    }
+
+    const timeInterval =
+      type === "yesterday"
+        ? [
+            dayjs(yesterdayStart).valueOf(),
+            dayjs(yesterdayStart).add(3, "hour").valueOf(),
+            dayjs(yesterdayStart).add(6, "hour").valueOf(),
+            dayjs(yesterdayStart).add(9, "hour").valueOf(),
+            dayjs(yesterdayStart).add(12, "hour").valueOf(),
+            dayjs(yesterdayStart).add(15, "hour").valueOf(),
+            dayjs(yesterdayStart).add(18, "hour").valueOf(),
+            dayjs(yesterdayStart).add(21, "hour").valueOf(),
+            dayjs(yesterdayStart).add(24, "hour").valueOf(),
+          ]
+        : [
+            dayjs(yesterdayEnd).valueOf(),
+            dayjs(yesterdayEnd).add(3, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(6, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(9, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(12, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(15, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(18, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(21, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(24, "hour").valueOf(),
+          ];
+
+    const finalDeviceDataList = [];
+    for (const deviceData of deviceDataList) {
+      const timeIntervalDataList = [];
+      for (let i = 0; i < timeInterval.length - 1; i++) {
+        const data = deviceData["list"].filter(
+          (item: any) =>
+            item["time"] >= timeInterval[i] &&
+            item["time"] < timeInterval[i + 1]
+        );
+        console.log("DATA", data);
+        const totalData = data.at(-1)["value"] - data.at(0)["value"];
+        timeIntervalDataList.push({
+          time: dayjs(timeInterval[i]).format("HH:mm"),
+          value: (totalData as number).toFixed(2),
+        });
+      }
+      finalDeviceDataList.push({
+        cusdeviceNo: deviceData["cusdeviceNo"],
+        cusdeviceName: deviceData["cusdeviceName"],
+        list: timeIntervalDataList,
+      });
+    }
+
+    const timeCategories = [
+      "00:00",
+      "03:00",
+      "06:00",
+      "09:00",
+      "12:00",
+      "15:00",
+      "18:00",
+      "21:00",
+    ];
+
+    const result = [];
+    for (const timeCategory of timeCategories) {
+      let totalElectricPower = 0;
+      for (const deviceData of finalDeviceDataList) {
+        totalElectricPower += parseFloat(
+          (deviceData["list"] as Array<any>).find(
+            (item: any) => item.time === timeCategory
+          )["value"]
+        );
+      }
+
+      result.push({
+        time: timeCategory,
+        value: totalElectricPower.toFixed(2),
+      });
+    }
+
+    return result;
+  }
 
   public static async getAlarmData() {
     // 最近一个月的告警数据
     const timeNow = new Date().getTime() / 1000;
     const timeLastMonth = timeNow - 30 * 24 * 60 * 60;
 
-    const token = await get("token");
+    const token = await get("token", fetchUserToken);
 
     const response = await fetch(
       "https://openapi.mp.usr.cn/usrCloud/V6/alarm/data/getAlarmHistory",

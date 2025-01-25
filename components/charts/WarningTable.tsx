@@ -35,5 +35,18 @@ export default function WarningTable() {
       alarmReason: "电流超限",
     },
   ];
-  return <Table columns={columns} dataSource={data} pagination={false} />;
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      pagination={false}
+      onRow={(record) => {
+        return {
+          onClick: () => {
+            window.open( "https://mp.usr.cn/#/cloud/data/ViewVariableAlarmHistory");
+          },
+        };
+      }}
+    />
+  );
 }

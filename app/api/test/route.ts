@@ -10,9 +10,9 @@ export async function GET(
   const projectId = "323324";
 
   // 2. 获取用户信息
-  const result = await DataService.getElectricChargeGroupByOperator(
+  const result = await DataService.getElectricPowerGroupByTime(
     projectId,
-    "lastMonth"
+    "yesterday"
   );
 
   // const result = await fetch("https://echarts.apache.org/examples/data/asset/geo/HK.json", {
