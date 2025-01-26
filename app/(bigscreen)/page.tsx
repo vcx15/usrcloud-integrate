@@ -26,6 +26,8 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Tab from "@/components/Tab";
 import RatioCard from "@/components/RatioCard";
+import { Popover } from "antd";
+import Number from "@/components/Number";
 // import { useEffect } from "react";
 // import autofit from "autofit.js";
 
@@ -116,9 +118,21 @@ function HeadArea() {
        * TODO: 排版有问题，需要调整
        */}
       <div className="flex flex-row grow space-x-[84px]">
-        <div className="flex flex-col justify-end mb-3">
-          <DropDownButton icon={LocationIcon} text={"中国（98/106）"} />
-        </div>
+        <Popover
+          content={
+            <div className="flex flex-col">
+              <div>1</div>
+              <div>2</div>
+              <div>3</div>
+            </div>
+          }
+          arrow={false}
+          trigger={"click"}
+        >
+          <div className="flex flex-col justify-end mb-3">
+            <DropDownButton icon={LocationIcon} text={"中国（98/106）"} />
+          </div>
+        </Popover>
         <div className="flex flex-col justify-end mb-3">
           <DropDownButton icon={UserIcon} text={"管理员"} />
         </div>
@@ -274,14 +288,14 @@ function OrgEnergyConsumeArea() {
 function MapArea() {
   return (
     <div className="flex flex-col w-full h-[43.8125rem] text-center bg-[#33333333]">
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-row">
+      <div className="flex flex-row justify-between mt-7">
+        <div className="flex flex-row ml-24 items-center space-x-1">
           <Image src={LocationFillIcon} alt="" />
-          <span>中国</span>
+          <span className="font-normal">中国</span>
         </div>
-        <div className="flex flex-col">
-          <div>组织总能耗</div>
-          <div>12345 KW·h</div>
+        <div className="flex flex-col mr-2">
+          <div>组织内的能耗总数（Kw·h）</div>
+          <Number num={1234} />
         </div>
       </div>
       <MapChart projectId="323324" />
@@ -297,12 +311,12 @@ function TrendArea() {
           tabButtonList={[
             {
               key: "yesterday",
-              action: () => {},
+              action: () => { },
               buttonName: "昨日",
             },
             {
               key: "today",
-              action: () => {},
+              action: () => { },
               buttonName: "今日",
             },
           ]}
@@ -396,7 +410,31 @@ function WarningArea() {
 function BillArea() {
   return (
     <div className="flex flex-col w-full h-[22.0625rem] text-center bg-[#33333333]">
-      <AreaTitle title="电费" />
+      <div className="flex flex-row justify-between">
+        <AreaTitle title="电费" />
+        <Tab
+          tabButtonList={[
+            {
+              key: "lastMonth",
+              action: () => {
+              },
+              buttonName: "上月",
+            },
+            {
+              key: "thisMonth",
+              action: () => {
+              },
+              buttonName: "本月",
+            },
+            {
+              key: "total",
+              action: () => {
+              },
+              buttonName: "总电费",
+            },
+          ]}
+        />
+      </div>
       <div className="flex ml-8">
         <span className="mt-6">单位：元</span>
       </div>
