@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { GeoJSONSourceInput } from "echarts/types/src/coord/geo/geoTypes.js";
 import Chart from "./Chart";
 
-export default function MapChart({ adcode, projectId }: { adcode: string; projectId?: string }) {
+export default function MapChart({ adcode, projectId, dataArray }: { adcode: string; projectId?: string, dataArray: Array<any> }) {
   const [geoJson, setGeoJson] = useState<any>();
   const [options, setOptions] = useState<any>({});
 
@@ -29,7 +29,7 @@ export default function MapChart({ adcode, projectId }: { adcode: string; projec
           // },
           tooltip: {
             trigger: "item",
-            formatter: "{b}<br/>设备数量：{c}",
+            formatter: "{b}<br/>总能耗：{c}",
           },
           geo: {
             map: mapName,
@@ -43,7 +43,7 @@ export default function MapChart({ adcode, projectId }: { adcode: string; projec
           },
           series: [
             {
-              name: "香港18区人口密度",
+              name: "地区能耗",
               type: "map",
               map: mapName,
               label: {
@@ -54,61 +54,84 @@ export default function MapChart({ adcode, projectId }: { adcode: string; projec
 
               // })
 
-              data: [
-                {
-                  name: "湖北省", value: 20057.34,
-                  itemStyle: {
-                    areaColor: {
-                      type: 'linear',
-                      x: 0,
-                      y: 0,
-                      x2: 0,
-                      y2: 1,
-                      colorStops: [{
-                        offset: 0, color: '#73B1FFFF' // 0% 处的颜色
-                      }, {
-                        offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
-                      }],
-                      global: false // 缺省为 false
-                    },
-                  },
-                },
-                {
-                  name: "湖南省", value: 15477.48, itemStyle: {
-                    areaColor: {
-                      type: 'linear',
-                      x: 0,
-                      y: 0,
-                      x2: 0,
-                      y2: 1,
-                      colorStops: [{
-                        offset: 0, color: '#73B1FFFF' // 0% 处的颜色
-                      }, {
-                        offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
-                      }],
-                      global: false // 缺省为 false
-                    },
-                  },
-                },
-                {
-                  name: "福建省", value: 31686.1, itemStyle: {
-                    areaColor: {
-                      type: 'linear',
-                      x: 0,
-                      y: 0,
-                      x2: 0,
-                      y2: 1,
-                      colorStops: [{
-                        offset: 0, color: '#73B1FFFF' // 0% 处的颜色
-                      }, {
-                        offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
-                      }],
-                      global: false // 缺省为 false
-                    },
-                  },
-                },
-              ],
-              // 自定义名称映射
+              data:
+
+                dataArray.map((item: any) => {
+                  return {
+                    name: item["adName"],
+                    value: item["result"],
+                    itemStyle: {
+                      areaColor: {
+                        type: 'linear',
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [{
+                          offset: 0, color: '#73B1FFFF' // 0% 处的颜色
+                        }, {
+                          offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
+                        }],
+                        global: false // 缺省为 false
+                      },
+                    }
+                  }
+                })
+              // [
+              //   {
+              //     name: "湖北省", value: 20057.34,
+              //     itemStyle: {
+              //       areaColor: {
+              //         type: 'linear',
+              //         x: 0,
+              //         y: 0,
+              //         x2: 0,
+              //         y2: 1,
+              //         colorStops: [{
+              //           offset: 0, color: '#73B1FFFF' // 0% 处的颜色
+              //         }, {
+              //           offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
+              //         }],
+              //         global: false // 缺省为 false
+              //       },
+              //     },
+              //   },
+              //   {
+              //     name: "湖南省", value: 15477.48, itemStyle: {
+              //       areaColor: {
+              //         type: 'linear',
+              //         x: 0,
+              //         y: 0,
+              //         x2: 0,
+              //         y2: 1,
+              //         colorStops: [{
+              //           offset: 0, color: '#73B1FFFF' // 0% 处的颜色
+              //         }, {
+              //           offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
+              //         }],
+              //         global: false // 缺省为 false
+              //       },
+              //     },
+              //   },
+              //   {
+              //     name: "福建省", value: 31686.1, itemStyle: {
+              //       areaColor: {
+              //         type: 'linear',
+              //         x: 0,
+              //         y: 0,
+              //         x2: 0,
+              //         y2: 1,
+              //         colorStops: [{
+              //           offset: 0, color: '#73B1FFFF' // 0% 处的颜色
+              //         }, {
+              //           offset: 1, color: '#2E8BFFFF' // 100% 处的颜色
+              //         }],
+              //         global: false // 缺省为 false
+              //       },
+              //     },
+              //   },
+              // ],
+              // // 自定义名称映射
               // nameMap: {
               //   "Central and Western": "中西区",
               //   Eastern: "东区",

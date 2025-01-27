@@ -27,4 +27,33 @@ export default function getAdcodeByProjectId(projectId: string) {
   }
 }
 
+export function getAdnameByProjectId(projectId: string) {
+  switch (projectId) {
+    case "323324":
+      return "中国"; // 中国
+    case "366973":
+      return "湖南省"; // 湖南
+    case "365786":
+      return "福建省"; // 福建
+    case "364002":
+      return "湖北省"; // 湖北
+    case "366974":
+      return "常德市"; // 常德
+    case "365789":
+      return "南平市"; // 南平
+    case "365788":
+      return "福州市"; // 福州
+    case "366093":
+      return "武汉市"; // 武汉
+    case "364010":
+      return "荆门市"; // 荆门
+    case "364004":
+      return "黄冈市"; // 黄冈
+    case "364003":
+      return "荆州市"; // 荆州
+    default:
+      return "中国"; // 中国
+  }
+}
+
 // export default async function mapProvinceName()

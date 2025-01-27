@@ -104,8 +104,8 @@ export default function BigScreen() {
       <div className="flex flex-row mt-4 mb-3.5 mx-3.5 h-[61.5625rem] space-x-4">
         <div className="flex flex-col w-[35.625rem] space-y-4">
           <ObjectStatisticsArea projectId={selectedArea?.id ?? rootProjectId} />
-          <EnergyConsumeArea />
-          <OrgEnergyConsumeArea />
+          <EnergyConsumeArea projectId={selectedArea?.id ?? rootProjectId} />
+          <OrgEnergyConsumeArea projectId={selectedArea?.id ?? rootProjectId} />
         </div>
         <div className="flex flex-col w-[45rem] space-y-4">
           <MapArea area={selectedArea} rootProjectId={rootProjectId} />
@@ -139,7 +139,7 @@ function HeadArea({ areaList, selectedArea, updateSelectedArea }: {
   }, []);
 
   return (
-    <div className="flex flex-row h-[3.5625rem] mt-2 mx-3.5 text-center bg-[#33333333]">
+    <div className="flex flex-row h-[3.5625rem] mt-2 mx-3.5 text-center">
       <div className="flex flex-row w-[66.8125rem] bg-[url('/top_head.svg')] bg-bottom bg-no-repeat">
         <div className="flex ml-1 mb-2">
           <Image src={Logo} alt="logo" />
@@ -226,13 +226,13 @@ function ObjectStatisticsArea({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     projectId && loadStatistic()
-    const timer = setInterval(loadStatistic, 2 * 60 * 1000);
-    return () => {
-      clearInterval(timer);
-    };
+    // const timer = setInterval(loadStatistic, 2 * 60 * 1000);
+    // return () => {
+    //   clearInterval(timer);
+    // };
   }, [projectId])
   return (
-    <div className="flex flex-col  w-full h-60 text-center bg-[#33333333]">
+    <div className="flex flex-col  w-full h-60 text-center">
       <AreaTitle title="对象统计" />
       <div className="flex flex-row ml-5 mt-9 space-x-28">
         <div className="flex flex-col space-y-8">
@@ -264,13 +264,33 @@ function ObjectStatisticsArea({ projectId }: { projectId: string }) {
   );
 }
 
-function EnergyConsumeArea() {
+function EnergyConsumeArea({ projectId }: { projectId: string }) {
   const [data, setData] = useState<Array<number>>([
-    100, 200, 700, 400, 600, 200, 100, 400,
+    0, 0, 0, 0, 0, 0, 0, 0,
   ]);
   const [type, setType] = useState<string>("lastMonth");
+
+  const loadData = () => {
+    fetch(`/api/project/${projectId}/electric-power/${type}/group-by-operator`, {
+      method: "GET"
+    }).then(async (res) => {
+      const result = await res.json();
+      setData(result["data"])
+    }).catch((error) => {
+      console.error("ERROR", error)
+    });
+  }
+
+  useEffect(() => {
+    projectId && loadData();
+    // const timer = setInterval(loadData, 5 * 60 * 1000);
+    // return () => {
+    //   clearInterval(timer);
+    // };
+  }, [type, projectId])
+
   return (
-    <div className="flex flex-col  w-full h-[22.5rem] text-center bg-[#33333333]">
+    <div className="flex flex-col  w-full h-[22.5rem] text-center">
       <div className="flex flex-row justify-between">
         <AreaTitle title="运营商能耗" />
         <Tab
@@ -278,7 +298,6 @@ function EnergyConsumeArea() {
             {
               key: "lastMonth",
               action: () => {
-                setData([100, 200, 700, 400, 600, 200, 100, 400]);
                 setType("lastMonth");
               },
               buttonName: "上月",
@@ -286,7 +305,6 @@ function EnergyConsumeArea() {
             {
               key: "thisMonth",
               action: () => {
-                setData([600, 100, 200, 500, 200, 200, 500, 800]);
                 setType("thisMonth");
               },
               buttonName: "本月",
@@ -294,7 +312,6 @@ function EnergyConsumeArea() {
             {
               key: "total",
               action: () => {
-                setData([300, 200, 100, 400, 900, 700, 500, 100]);
                 setType("total");
               },
               buttonName: "总电能",
@@ -308,23 +325,54 @@ function EnergyConsumeArea() {
     </div>
   );
 }
-function OrgEnergyConsumeArea() {
+function OrgEnergyConsumeArea({
+  projectId
+}: {
+  projectId: string
+}) {
   const [categories, setCategories] = useState<Array<string>>([
-    "1",
-    "2",
-    "3",
-    "4",
-    "1",
-    "2",
-    "3",
-    "4",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
   ]);
   const [data, setData] = useState<Array<number>>([
-    100, 200, 700, 400, 600, 200, 100, 400,
+    0, 0, 0, 0, 0, 0, 0, 0,
   ]);
   const [type, setType] = useState<string>("lastMonth");
+
+  const loadData = () => {
+    fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
+      method: "GET"
+    }).then(async (res) => {
+      const result = await res.json();
+      const dataArray: Array<any> = result["data"]
+      setCategories(dataArray.map((item: any) => {
+        return item["name"]
+      }))
+      setData(dataArray.map((item: any) => {
+        return item["result"]
+      }))
+    }).catch((error) => {
+      console.error("ERROR", error)
+    });
+  }
+
+  useEffect(() => {
+    projectId && loadData();
+    // const timer = setInterval(loadData, 5 * 60 * 1000);
+    // return () => {
+    //   clearInterval(timer);
+    // };
+  }, [type, projectId])
+
+
   return (
-    <div className="flex flex-col w-full h-[22.0625rem] text-center bg-[#33333333]">
+    <div className="flex flex-col w-full h-[22.0625rem] text-center">
       <div className="flex flex-row justify-between">
         <AreaTitle title="组织内能耗" />
         <Tab
@@ -332,7 +380,7 @@ function OrgEnergyConsumeArea() {
             {
               key: "lastMonth",
               action: () => {
-                setData([100, 200, 700, 400, 600, 200, 100, 400]);
+                // setData([100, 200, 700, 400, 600, 200, 100, 400]);
                 setType("lastMonth");
               },
               buttonName: "上月",
@@ -340,7 +388,7 @@ function OrgEnergyConsumeArea() {
             {
               key: "thisMonth",
               action: () => {
-                setData([600, 100, 200, 500, 200, 200, 500, 800]);
+                // setData([600, 100, 200, 500, 200, 200, 500, 800]);
                 setType("thisMonth");
               },
               buttonName: "本月",
@@ -348,7 +396,7 @@ function OrgEnergyConsumeArea() {
             {
               key: "total",
               action: () => {
-                setData([300, 200, 100, 400, 900, 700, 500, 100]);
+                // setData([300, 200, 100, 400, 900, 700, 500, 100]);
                 setType("total");
               },
               buttonName: "总电能",
@@ -364,8 +412,40 @@ function OrgEnergyConsumeArea() {
 }
 
 function MapArea({ area, rootProjectId }: { area?: Province, rootProjectId?: string }) {
+
+  const [totalData, setTotalData] = useState<number>(0)
+  const [dataArray, setDataArray] = useState<Array<any>>([
+    {
+        "id": 366973,
+        "name": "湖南铁塔分公司",
+        "adName": "湖南省",
+        "result": 217.92
+    },
+    {
+        "id": 365786,
+        "name": "福建铁塔分公司",
+        "adName": "福建省",
+        "result": 2.9000000000000004
+    },
+    {
+        "id": 364002,
+        "name": "湖北铁塔分公司",
+        "adName": "湖北省",
+        "result": 9803.07
+    }
+])
+
+  const getTotal = (dataArray: Array<any>) => {
+    let total = 0
+    for (const data of dataArray) {
+      total += data["result"]
+    }
+
+    return Math.floor(total)
+
+  }
   return (
-    <div className="flex flex-col w-full h-[43.8125rem] text-center bg-[#33333333]">
+    <div className="flex flex-col w-full h-[43.8125rem] text-center">
       <div className="flex flex-row justify-between mt-7">
         <div className="flex flex-row ml-24 items-center space-x-1">
           <Image src={LocationFillIcon} alt="" />
@@ -373,17 +453,17 @@ function MapArea({ area, rootProjectId }: { area?: Province, rootProjectId?: str
         </div>
         <div className="flex flex-col mr-2">
           <div>组织内的能耗总数（Kw·h）</div>
-          <Number num={1234} />
+          <Number num={getTotal(dataArray)} />
         </div>
       </div>
-      <MapChart adcode={area?.adcode ?? "100000"} projectId={area?.id ?? rootProjectId} />
+      <MapChart adcode={area?.adcode ?? "100000"} projectId={area?.id ?? rootProjectId} dataArray={dataArray} />
     </div>
   );
 }
 
 function TrendArea() {
   return (
-    <div className="flex flex-col w-full h-[16.75rem] text-center bg-[#33333333]">
+    <div className="flex flex-col w-full h-[16.75rem] text-center">
       <div className="flex flex-row justify-end">
         <Tab
           tabButtonList={[
@@ -408,68 +488,126 @@ function TrendArea() {
 }
 
 function RatioArea() {
+  const [ratioList, setRatioList] = useState<Array<any>>();
+
+  const getTotal = (ratioList: Array<any>) => {
+    let total = 0;
+    for (const ratioData of ratioList) {
+      total += ratioData.totalElectricPower;
+    }
+    return total
+  }
+
+  const getValue = (ratioList: Array<any>, opName: string) => {
+    if (ratioList.length === 0) return 0;
+    return ratioList.find((item: any) => item.opName === opName)?.totalElectricPower ?? 0;
+  }
+
+
+  useEffect(() => {
+    setRatioList([
+      {
+        opName: "移动",
+        totalElectricPower: 2780.07,
+      },
+      {
+        opName: "联通",
+        totalElectricPower: 5408.10,
+      },
+      {
+        opName: "电信",
+        totalElectricPower: 95.37,
+      },
+      {
+        opName: "广电",
+        totalElectricPower: 0.00,
+      },
+      {
+        opName: "智联",
+        totalElectricPower: 0.00,
+      },
+      {
+        opName: "铁塔",
+        totalElectricPower: 0.00,
+      },
+      {
+        opName: "能源",
+        totalElectricPower: 0.00,
+      },
+      {
+        opName: "无租户",
+        totalElectricPower: 0.66,
+      }
+    ])
+  }, [])
+
   return (
-    <div className="flex flex-col w-full h-60 text-center bg-[#33333333]">
+    <div className="flex flex-col w-full h-60 text-center">
       <AreaTitle title="运营商能耗分摊占比" />
       <div className="flex flex-row h-full">
         <div className="w-[30%] h-full">
-          <RingPieChart />
+          <RingPieChart total={getTotal(ratioList ?? [])} data={ratioList?.map((item: any) => {
+            return {
+              name: item["opName"],
+              value: item["totalElectricPower"]
+            }
+          }) ?? []} />
         </div>
-        <div className="flex flex-col h-full w-[70%] bg-slate-400">
+        <div className="flex flex-col h-full w-[70%]">
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
               color={"bg-[#4DC0FCFF]"}
               name={"移动"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "移动")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "移动") / getTotal(ratioList ?? [])).toFixed(2)}
             />
             <RatioCard
               color={"bg-[#F84446FF]"}
               name={"联通"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "联通")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "联通") / getTotal(ratioList ?? [])).toFixed(2)}
             />
           </div>
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
               color={"bg-[#5676FCFF]"}
               name={"电信"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "电信")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "电信") / getTotal(ratioList ?? [])).toFixed(2)}
             />
             <RatioCard
               color={"bg-[#FB9020FF]"}
               name={"广电"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "广电")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "广电") / getTotal(ratioList ?? [])).toFixed(2)}
             />
           </div>
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
-              color={"bg-[#4DC0FCFF]"}
+              color={"bg-[#ACB0FCFF]"}
               name={"铁塔"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "铁塔")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "铁塔") / getTotal(ratioList ?? [])).toFixed(2)}
             />
             <RatioCard
-              color={"bg-[#F84446FF]"}
+              color={"bg-[#87AB46FF]"}
               name={"智联"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "智联")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "智联") / getTotal(ratioList ?? [])).toFixed(2)}
             />
           </div>
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
-              color={"bg-[#5676FCFF]"}
+              color={"bg-[#771FFCFF]"}
               name={"能源"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "能源")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "能源") / getTotal(ratioList ?? [])).toFixed(2)}
             />
             <RatioCard
-              color={"bg-[#FB9020FF]"}
+              color={"bg-[#489A20FF]"}
               name={"无租户"}
-              value={"700"}
-              ratio={"40"}
+              value={(getValue(ratioList ?? [], "无租户")).toString()}
+              ratio={(100 * getValue(ratioList ?? [], "无租户") / getTotal(ratioList ?? [])).toFixed(2)}
             />
           </div>
         </div>
@@ -478,16 +616,33 @@ function RatioArea() {
   );
 }
 function WarningArea() {
+  const [warningData, setWarningData] = useState<Array<any>>()
+
+  const loadAlarmData = () => {
+    fetch(`/api/alarm`, {
+      method: "GET"
+    }).then(async (res) => {
+      const result = await res.json();
+      setWarningData(result["data"])
+    }).catch((error) => {
+
+    })
+  }
+
+  useEffect(() => {
+    loadAlarmData();
+  })
+
   return (
-    <div className="flex flex-col w-full h-[22.5rem] text-center bg-[#33333333]">
+    <div className="flex flex-col w-full h-[22.5rem] text-center">
       <AreaTitle title="实时告警" />
-      <WarningTable />
+      <WarningTable warningData={warningData ?? []} />
     </div>
   );
 }
 function BillArea() {
   return (
-    <div className="flex flex-col w-full h-[22.0625rem] text-center bg-[#33333333]">
+    <div className="flex flex-col w-full h-[22.0625rem] text-center">
       <div className="flex flex-row justify-between">
         <AreaTitle title="电费" />
         <Tab

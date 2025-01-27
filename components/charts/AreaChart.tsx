@@ -5,14 +5,14 @@ export default function AreaChart() {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"],
     },
     yAxis: {
       type: "value",
     },
     series: [
       {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
+        data: [2.75, 2.39, 4.71, 5.67, 5.35, 5.79, 5.05, 4.87],
         type: "line",
         areaStyle: {
           color: {
@@ -24,11 +24,11 @@ export default function AreaChart() {
             colorStops: [
               {
                 offset: 0,
-                color: "rgba(237,66,100, 0.5)", // 0% 处的颜色
+                color: "#2E8BFFFF", // 0% 处的颜色
               },
               {
                 offset: 1,
-                color: "rgba(234,174,10, 1)", // 100% 处的颜色
+                color: "#2E8BFF00", // 100% 处的颜色
               },
             ],
             global: false,

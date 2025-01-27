@@ -1,10 +1,10 @@
 import Chart from "./Chart";
 
-export default function RingPieChart() {
+export default function RingPieChart({total, data}: {total: number, data: Array<any>}) {
   const options = {
     title: {
-      text: "xxxx",
-      subtext: "xxxxxxxxsub",
+      text: `${total} Kw·h`,
+      subtext: "总电能",
       subtextStyle: {
         color: "#333333FF"
       },
@@ -16,7 +16,7 @@ export default function RingPieChart() {
     },
     series: [
       {
-        name: "Access From",
+        name: "运营商总电能",
         type: "pie",
         radius: ["70%", "90%"],
         bottom: "30%",
@@ -25,23 +25,17 @@ export default function RingPieChart() {
           show: false,
           position: "center",
         },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 40,
-            fontWeight: "bold",
-          },
-        },
+        // emphasis: {
+        //   label: {
+        //     show: true,
+        //     fontSize: 40,
+        //     fontWeight: "bold",
+        //   },
+        // },
         labelLine: {
           show: false,
         },
-        data: [
-          { value: 1048, name: "Search Engine" },
-          { value: 735, name: "Direct" },
-          { value: 580, name: "Email" },
-          { value: 484, name: "Union Ads" },
-          { value: 300, name: "Video Ads" },
-        ],
+        data: data,
       },
     ],
   };

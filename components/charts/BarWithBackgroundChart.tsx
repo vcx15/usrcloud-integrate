@@ -10,7 +10,7 @@ export default function BarWithBackgroundChart({
   const options = {
     xAxis: {
       type: "category",
-      data: ["移动", "电信", "联通", "广电", "智联", "能源", "铁塔", "其他"],
+      data: ["移动", "联通", "电信", "广电", "智联", "能源", "铁塔", "其他"],
     },
     yAxis: {
       type: "value",

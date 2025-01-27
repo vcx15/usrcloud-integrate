@@ -1,6 +1,10 @@
 import { ConfigProvider, Table } from "antd";
 
-export default function WarningTable() {
+export default function WarningTable({
+  warningData,
+}: {
+  warningData: Array<any>
+}) {
   const columns = [
     {
       key: "1",
@@ -14,35 +18,27 @@ export default function WarningTable() {
       render: (value: any, index: any) => <span>{value.baseStationName}</span>,
       className: "thead-change",
     },
+    // {
+    //   key: "3",
+    //   title: "设备地址",
+    //   render: (value: any, index: any) => <span>{value.deviceAddress}</span>,
+    //   className: "thead-change",
+    // },
     {
       key: "3",
-      title: "设备地址",
-      render: (value: any, index: any) => <span>{value.deviceAddress}</span>,
-      className: "thead-change",
-    },
-    {
-      key: "4",
       title: "告警原因",
       render: (value: any, index: any) => <span>{value.alarmReason}</span>,
       className: "thead-change",
     },
   ];
-  const data = [
-    {
-      key: "1",
-      time: "2022-01-01 12:00:00",
-      baseStationName: "基站1",
-      deviceAddress: "合肥蜀山区",
-      alarmReason: "电流超限",
-    },
-    {
-      key: "2",
-      time: "2022-01-01 12:00:00",
-      baseStationName: "基站1",
-      deviceAddress: "合肥蜀山区",
-      alarmReason: "电流超限",
-    },
-  ];
+  const data = warningData.map((item: any, index: number) => {
+    return {
+      key: index,
+      time: item["alarmTime"],
+      baseStationName: item["baseStation"],
+      alarmReason: item["reason"],
+    }
+  });
   return (
     // <ConfigProvider theme={{
     //   components: {

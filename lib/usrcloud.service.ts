@@ -2,7 +2,7 @@ import { pad } from "echarts/types/src/util/time.js";
 import { get } from "./cache.service";
 import { Province } from "./entities";
 import dayjs from "dayjs";
-import getAdcodeByProjectId from "./utils";
+import getAdcodeByProjectId, { getAdnameByProjectId } from "./utils";
 
 // Configuration
 const API_URL =
@@ -103,13 +103,15 @@ export class OrgService {
         return {
           id: item["id"],
           name: item["projectName"],
-          adcode: getAdcodeByProjectId((item["id"]).toString())
+          adcode: getAdcodeByProjectId((item["id"]).toString()),
+          adName: getAdnameByProjectId((item["id"]).toString())
         } as Province;
       });
     return [{
       id: rootOrgId,
       name: "中国",
-      adcode: getAdcodeByProjectId((rootOrgId).toString())
+      adcode: getAdcodeByProjectId((rootOrgId).toString()),
+      adName: getAdnameByProjectId((rootOrgId).toString())
     }, ...provinceList];
   }
 
@@ -892,7 +894,7 @@ export class DataService {
           alarmType: 0,
           alarmState: 1,
           pageNo: 1,
-          pageSize: 7,
+          pageSize: 5,
           timeStart: timeLastMonth,
           timeEnd: timeNow,
         }),
@@ -910,5 +912,7 @@ export class DataService {
         reason: item["triggerName"] + ": " + item["content"],
       };
     });
+
+    return alarmList
   }
 }
