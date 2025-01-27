@@ -5,7 +5,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const adcode = await getAdcodeByProjectId((await params).id);
+  const adcode = getAdcodeByProjectId((await params).id);
   const result = await fetch(
     `https://geo.datav.aliyun.com/areas_v3/bound/${adcode}_full.json`,
     {

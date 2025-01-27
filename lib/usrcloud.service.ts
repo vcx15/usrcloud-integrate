@@ -2,6 +2,7 @@ import { pad } from "echarts/types/src/util/time.js";
 import { get } from "./cache.service";
 import { Province } from "./entities";
 import dayjs from "dayjs";
+import getAdcodeByProjectId from "./utils";
 
 // Configuration
 const API_URL =
@@ -102,9 +103,14 @@ export class OrgService {
         return {
           id: item["id"],
           name: item["projectName"],
+          adcode: getAdcodeByProjectId((item["id"]).toString())
         } as Province;
       });
-    return provinceList;
+    return [{
+      id: rootOrgId,
+      name: "中国",
+      adcode: getAdcodeByProjectId((rootOrgId).toString())
+    }, ...provinceList];
   }
 
   public static async getSubOrg(projectId: string) {
@@ -297,23 +303,23 @@ export class DataService {
     }
     return isGroupByTime
       ? dataPointList
-          .filter((item: any) => (item["name"] as string) === "直流负载总电能")
-          .map((item: any) => {
-            return {
-              id: item["dataPointRelId"],
-              deviceId: cusDeviceId,
-              name: item["name"],
-            };
-          })
+        .filter((item: any) => (item["name"] as string) === "直流负载总电能")
+        .map((item: any) => {
+          return {
+            id: item["dataPointRelId"],
+            deviceId: cusDeviceId,
+            name: item["name"],
+          };
+        })
       : dataPointList
-          .filter((item: any) => (item["name"] as string).endsWith(endString))
-          .map((item: any) => {
-            return {
-              id: item["dataPointRelId"],
-              deviceId: cusDeviceId,
-              name: item["name"],
-            };
-          });
+        .filter((item: any) => (item["name"] as string).endsWith(endString))
+        .map((item: any) => {
+          return {
+            id: item["dataPointRelId"],
+            deviceId: cusDeviceId,
+            name: item["name"],
+          };
+        });
   }
 
   public static async getElectricalPowerGroupByOperator(
@@ -791,27 +797,27 @@ export class DataService {
     const timeInterval =
       type === "yesterday"
         ? [
-            dayjs(yesterdayStart).valueOf(),
-            dayjs(yesterdayStart).add(3, "hour").valueOf(),
-            dayjs(yesterdayStart).add(6, "hour").valueOf(),
-            dayjs(yesterdayStart).add(9, "hour").valueOf(),
-            dayjs(yesterdayStart).add(12, "hour").valueOf(),
-            dayjs(yesterdayStart).add(15, "hour").valueOf(),
-            dayjs(yesterdayStart).add(18, "hour").valueOf(),
-            dayjs(yesterdayStart).add(21, "hour").valueOf(),
-            dayjs(yesterdayStart).add(24, "hour").valueOf(),
-          ]
+          dayjs(yesterdayStart).valueOf(),
+          dayjs(yesterdayStart).add(3, "hour").valueOf(),
+          dayjs(yesterdayStart).add(6, "hour").valueOf(),
+          dayjs(yesterdayStart).add(9, "hour").valueOf(),
+          dayjs(yesterdayStart).add(12, "hour").valueOf(),
+          dayjs(yesterdayStart).add(15, "hour").valueOf(),
+          dayjs(yesterdayStart).add(18, "hour").valueOf(),
+          dayjs(yesterdayStart).add(21, "hour").valueOf(),
+          dayjs(yesterdayStart).add(24, "hour").valueOf(),
+        ]
         : [
-            dayjs(yesterdayEnd).valueOf(),
-            dayjs(yesterdayEnd).add(3, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(6, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(9, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(12, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(15, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(18, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(21, "hour").valueOf(),
-            dayjs(yesterdayEnd).add(24, "hour").valueOf(),
-          ];
+          dayjs(yesterdayEnd).valueOf(),
+          dayjs(yesterdayEnd).add(3, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(6, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(9, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(12, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(15, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(18, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(21, "hour").valueOf(),
+          dayjs(yesterdayEnd).add(24, "hour").valueOf(),
+        ];
 
     const finalDeviceDataList = [];
     for (const deviceData of deviceDataList) {

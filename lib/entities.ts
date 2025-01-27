@@ -1,5 +1,5 @@
 export type Province = {
     id: string;
-    mapCode: string;
+    adcode: string;
     name: string;
 }

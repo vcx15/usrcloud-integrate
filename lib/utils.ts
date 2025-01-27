@@ -1,4 +1,4 @@
-export default async function getAdcodeByProjectId(projectId: string) {
+export default function getAdcodeByProjectId(projectId: string) {
   switch (projectId) {
     case "323324":
       return "100000"; // 中国
@@ -26,3 +26,5 @@ export default async function getAdcodeByProjectId(projectId: string) {
       return "100000"; // 中国
   }
 }
+
+// export default async function mapProvinceName()

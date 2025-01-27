@@ -28,6 +28,9 @@ import Tab from "@/components/Tab";
 import RatioCard from "@/components/RatioCard";
 import { Popover } from "antd";
 import Number from "@/components/Number";
+import { OrgService, UserService } from "@/lib/usrcloud.service";
+import { Province } from "@/lib/entities";
+import { error } from "console";
 // import { useEffect } from "react";
 // import autofit from "autofit.js";
 
@@ -62,9 +65,42 @@ export default function BigScreen() {
       window.onresize = null;
     };
   }, []);
+
+  // 地区列表加载
+  const [areaList, setAreaList] = useState<Array<any>>([])
+  const [selectedArea, setSelectedArea] = useState<Province>()
+
+  const loadAreaList = () => {
+    fetch("/api/org/province", {
+      method: "GET"
+    }).then(async (response) => {
+      const result = await response.json();
+      console.log("RESPONSE", result)
+      setAreaList(result["provinceList"])
+    }).catch((error) => {
+      console.error("ERROR", error)
+    })
+  }
+
+  useEffect(() => {
+    loadAreaList();
+    setSelectedArea(areaList.at(0));
+  }, [])
+
+  const [rootProjectId, setRootProjectId] = useState<string>("")
+  useEffect(() => {
+    UserService.getUser().then((user) => {
+      setRootProjectId(user["data"]["projectId"])
+    }).catch((error) => {
+      console.error("ERROR", error)
+    })
+    // const rootOrgId = user["data"]["projectId"];
+  }, [])
   return (
     <div className="flex flex-col">
-      <HeadArea />
+      <HeadArea areaList={areaList} selectedArea={selectedArea} updateSelectedArea={(area: Province) => {
+        setSelectedArea(area)
+      }} />
       <div className="flex flex-row mt-4 mb-3.5 mx-3.5 h-[61.5625rem] space-x-4">
         <div className="flex flex-col w-[35.625rem] space-y-4">
           <ObjectStatisticsArea />
@@ -72,7 +108,7 @@ export default function BigScreen() {
           <OrgEnergyConsumeArea />
         </div>
         <div className="flex flex-col w-[45rem] space-y-4">
-          <MapArea />
+          <MapArea area={selectedArea} rootProjectId={rootProjectId} />
           <TrendArea />
         </div>
         <div className="flex flex-col w-[35.625rem] space-y-4">
@@ -85,7 +121,11 @@ export default function BigScreen() {
   );
 }
 
-function HeadArea() {
+function HeadArea({ areaList, selectedArea, updateSelectedArea }: {
+  areaList: Array<any>,
+  selectedArea?: Province,
+  updateSelectedArea: (area: Province) => void;
+}) {
   const [currentTime, setCurrentTime] = useState<string>();
 
   useEffect(() => {
@@ -121,16 +161,20 @@ function HeadArea() {
         <Popover
           content={
             <div className="flex flex-col">
-              <div>1</div>
-              <div>2</div>
-              <div>3</div>
+              {
+                areaList.map((item: any, index: number) => {
+                  return <div className="hover:cursor-pointer" key={index} onClick={() => {
+                    updateSelectedArea(item as Province)
+                  }}>{item.name}</div>
+                })
+              }
             </div>
           }
           arrow={false}
           trigger={"click"}
         >
-          <div className="flex flex-col justify-end mb-3">
-            <DropDownButton icon={LocationIcon} text={"中国（98/106）"} />
+          <div className="flex flex-col justify-end mb-3 w-[180px]">
+            <DropDownButton icon={LocationIcon} text={`${selectedArea?.name ?? "中国"}(1/${areaList.length})`} />
           </div>
         </Popover>
         <div className="flex flex-col justify-end mb-3">
@@ -285,20 +329,20 @@ function OrgEnergyConsumeArea() {
   );
 }
 
-function MapArea() {
+function MapArea({ area, rootProjectId }: { area?: Province, rootProjectId?: string }) {
   return (
     <div className="flex flex-col w-full h-[43.8125rem] text-center bg-[#33333333]">
       <div className="flex flex-row justify-between mt-7">
         <div className="flex flex-row ml-24 items-center space-x-1">
           <Image src={LocationFillIcon} alt="" />
-          <span className="font-normal">中国</span>
+          <span className="font-normal">{area?.name ?? "中国"}</span>
         </div>
         <div className="flex flex-col mr-2">
           <div>组织内的能耗总数（Kw·h）</div>
           <Number num={1234} />
         </div>
       </div>
-      <MapChart projectId="323324" />
+      <MapChart adcode={area?.adcode ?? "100000"} projectId={area?.id ?? rootProjectId} />
     </div>
   );
 }

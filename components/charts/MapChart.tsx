@@ -3,18 +3,21 @@ import { useEffect, useState } from "react";
 // import geoJson from "@/public/map/cn.json"
 import { GeoJSONSourceInput } from "echarts/types/src/coord/geo/geoTypes.js";
 import Chart from "./Chart";
-import getAdcodeByProjectId from "@/lib/utils";
 
-export default function MapChart({ projectId }: { projectId: string }) {
+export default function MapChart({ adcode, projectId }: { adcode: string; projectId?: string }) {
   const [geoJson, setGeoJson] = useState<any>();
   const [options, setOptions] = useState<any>({});
 
+  const mapName = adcode === "100000" ? "china" : "map" + adcode;
+
   useEffect(() => {
-    fetch(`/api/project/${projectId}/map`, {
+    fetch(`/api/map/${adcode}`, {
       method: "GET",
     })
       .then(async (res) => {
-        registerMap("map", (await res.json()) as GeoJSONSourceInput);
+        const jsonResult = await res.json();
+        registerMap(mapName, jsonResult as GeoJSONSourceInput);
+        // setGeoJson(jsonResult)
       })
       .finally(() => {
         setOptions({
@@ -29,7 +32,7 @@ export default function MapChart({ projectId }: { projectId: string }) {
             formatter: "{b}<br/>设备数量：{c}",
           },
           geo: {
-            map: "map",
+            map: mapName,
             itemStyle: {
               normal: {
                 shadowColor: "rgba(0, 0, 0, 0.5)", // 阴影颜色
@@ -42,10 +45,14 @@ export default function MapChart({ projectId }: { projectId: string }) {
             {
               name: "香港18区人口密度",
               type: "map",
-              map: "map",
+              map: mapName,
               label: {
                 show: true,
               },
+
+              // data: (geoJson["features"] as Array<any>).filter(() => {
+
+              // })
 
               data: [
                 {
@@ -126,7 +133,7 @@ export default function MapChart({ projectId }: { projectId: string }) {
           ],
         });
       });
-  }, []);
+  }, [adcode]);
 
-  return <Chart options={options}></Chart>;
+  return <Chart options={options} id={adcode}></Chart>;
 }
