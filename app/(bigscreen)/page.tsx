@@ -103,7 +103,7 @@ export default function BigScreen() {
       }} />
       <div className="flex flex-row mt-4 mb-3.5 mx-3.5 h-[61.5625rem] space-x-4">
         <div className="flex flex-col w-[35.625rem] space-y-4">
-          <ObjectStatisticsArea />
+          <ObjectStatisticsArea projectId={selectedArea?.id ?? rootProjectId} />
           <EnergyConsumeArea />
           <OrgEnergyConsumeArea />
         </div>
@@ -196,7 +196,41 @@ function HeadArea({ areaList, selectedArea, updateSelectedArea }: {
   );
 }
 
-function ObjectStatisticsArea() {
+function ObjectStatisticsArea({ projectId }: { projectId: string }) {
+  const [basestationCount, setBasestationCount] = useState<number>(0)
+  const [controllerCount, setControllerCount] = useState<number>(0)
+  const [cameraCount, setCameraCount] = useState<number>(0)
+  const [otherCount, setOtherCount] = useState<number>(0)
+
+  const loadStatistic = () => {
+    // 加载基站数量数据
+    fetch(`/api/project/${projectId}/device-count/base-station`, {
+      method: "GET"
+    }).then(async (response) => {
+      const result = await response.json();
+      setBasestationCount(result["count"])
+    }).catch((error) => {
+      console.error("ERROR", error)
+    });
+
+    // 加载控制器数量数据
+    fetch(`/api/project/${projectId}/device-count/controller`, {
+      method: "GET"
+    }).then(async (response) => {
+      const result = await response.json();
+      setControllerCount(result["count"])
+    }).catch((error) => {
+      console.error("ERROR", error)
+    });
+  }
+
+  useEffect(() => {
+    projectId && loadStatistic()
+    const timer = setInterval(loadStatistic, 2 * 60 * 1000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [projectId])
   return (
     <div className="flex flex-col  w-full h-60 text-center bg-[#33333333]">
       <AreaTitle title="对象统计" />
@@ -205,24 +239,24 @@ function ObjectStatisticsArea() {
           <ObjectStatisticsCard
             icon={BaseStationIcon}
             label="基站总数量"
-            value={100}
+            value={basestationCount}
           />
           <ObjectStatisticsCard
             icon={CameraIcon}
             label="摄像头总数量"
-            value={100}
+            value={cameraCount}
           />
         </div>
         <div className="flex flex-col space-y-8">
           <ObjectStatisticsCard
             icon={ControlIcon}
             label="计量控制设备总数量"
-            value={100}
+            value={controllerCount}
           />
           <ObjectStatisticsCard
             icon={OthersIcon}
             label="其他设备总数量"
-            value={100}
+            value={otherCount}
           />
         </div>
       </div>
