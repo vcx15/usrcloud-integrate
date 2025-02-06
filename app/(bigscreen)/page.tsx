@@ -346,20 +346,20 @@ function OrgEnergyConsumeArea({
   const [type, setType] = useState<string>("lastMonth");
 
   const loadData = () => {
-    fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
-      method: "GET"
-    }).then(async (res) => {
-      const result = await res.json();
-      const dataArray: Array<any> = result["data"]
-      setCategories(dataArray.map((item: any) => {
-        return item["name"]
-      }))
-      setData(dataArray.map((item: any) => {
-        return item["result"]
-      }))
-    }).catch((error) => {
-      console.error("ERROR", error)
-    });
+    // fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
+    //   method: "GET"
+    // }).then(async (res) => {
+    //   const result = await res.json();
+    //   const dataArray: Array<any> = result["data"]
+    //   setCategories(dataArray.map((item: any) => {
+    //     return item["name"]
+    //   }))
+    //   setData(dataArray.map((item: any) => {
+    //     return item["result"]
+    //   }))
+    // }).catch((error) => {
+    //   console.error("ERROR", error)
+    // });
   }
 
   useEffect(() => {
@@ -631,7 +631,7 @@ function WarningArea() {
 
   useEffect(() => {
     loadAlarmData();
-  })
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-[22.5rem] text-center">

@@ -7,8 +7,8 @@ export const cache = new Cacheables({
   log: true,
 });
 
-export const get = (key: string, action: () => Promise<any>) =>
+export const get = (key: string, action: () => Promise<any>, expireTime?: number) =>
   cache.cacheable(action, key, {
     cachePolicy: "max-age",
-    maxAge: 7200000, // 2 hours
+    maxAge: expireTime ?? 7200000, // 2 hours
   });

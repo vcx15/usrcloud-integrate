@@ -11,7 +11,7 @@ const API_URL =
 const APP_KEY = process.env.APP_KEY || "JzihOBti";
 const APP_SECRET = process.env.APP_SECRET || "edc919p2md2afinboc4r29k06y284eck";
 
-const dataServerUrl = "https://history.usr.cn:7002";
+// const dataServerUrl = "https://history.usr.cn:7002";
 
 // Function to fetch user token
 export const fetchUserToken = async (): Promise<string> => {
@@ -30,25 +30,25 @@ export const fetchUserToken = async (): Promise<string> => {
   return data.data["X-Access-Token"];
 };
 
-// export const fetchDataHistoryServerAddress = async (): Promise<string> => {
-//   const token = await get("token");
+export const fetchDataHistoryServerAddress = async (): Promise<string> => {
+  const token = await get("token", fetchUserToken);
 
-//   const response = await fetch(
-//     "https://openapi.mp.usr.cn/usrCloud/V6/ucloudSdk/getHistoryServerAddress",
-//     {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         "X-Access-Token": token,
-//       },
-//       body: JSON.stringify({}),
-//     }
-//   );
+  const response = await fetch(
+    "https://openapi.mp.usr.cn/usrCloud/V6/ucloudSdk/getHistoryServerAddress",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Token": token,
+      },
+      body: JSON.stringify({}),
+    }
+  );
 
-//   const result = await response.json();
+  const result = await response.json();
 
-//   return result["data"]["historyServerAddr"];
-// };
+  return result["data"]["historyServerAddr"];
+};
 
 export class UserService {
   public static async getUser() {
@@ -365,7 +365,7 @@ export class DataService {
         "电能"
       );
 
-      const historyServerAddress = dataServerUrl;
+      const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
       console.log("HISTORY SERVER ADDRESS", historyServerAddress);
       // 获取该设备的最新数据
 
@@ -503,7 +503,7 @@ export class DataService {
           "电能"
         );
 
-        const historyServerAddress = dataServerUrl;
+        const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
         console.log("HISTORY SERVER ADDRESS", historyServerAddress);
         // 获取该设备的最新数据
 
@@ -612,7 +612,7 @@ export class DataService {
         "电费"
       );
 
-      const historyServerAddress = dataServerUrl;
+      const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
       console.log("HISTORY SERVER ADDRESS", historyServerAddress);
       // 获取该设备的最新数据
 
@@ -763,7 +763,7 @@ export class DataService {
 
       console.log("DATALIST", datapointList);
 
-      const historyServerAddress = dataServerUrl;
+      const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
       console.log("HISTORY SERVER ADDRESS", historyServerAddress);
 
       // 获取该设备的历史数据
@@ -902,6 +902,7 @@ export class DataService {
     );
 
     const result = await response.json();
+    console.log("result", result);
 
     const alarmList = result["data"]["list"].map((item: any) => {
       return {
