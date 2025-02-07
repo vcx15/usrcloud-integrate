@@ -206,28 +206,63 @@ export class OrgService {
 }
 
 export class DeviceService {
-
   // 加载组织下的所有设备
   public static async loadAllDevice(projectId: string): Promise<any> {
-        // 基站数量
-        const token = await get("token", fetchUserToken);
+    // 基站数量
+    const token = await get("token", fetchUserToken);
 
-        const response = await fetch(
-          "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Access-Token": token,
-            },
-            body: JSON.stringify({
-              projectId: projectId,
-            }),
-          }
-        );
-    
-        const data = await response.json();
+    const response = await fetch(
+      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          projectId: projectId,
+        }),
+      }
+    );
 
+    const data = await response.json();
+
+    const deviceTotal = data["data"]["total"];
+
+    const deviceList = [];
+    while (deviceList.length < deviceTotal) {
+      // console.log("dataPointList.length", dataPointList.length);
+      // console.log("dataSize", dataSize);
+      const response = await fetch(
+        `https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Access-Token": token,
+          },
+          body: JSON.stringify({
+            projectId: projectId,
+            pageNo: deviceList.length / 500 + 1,
+            pageSize: 500,
+          }),
+        }
+      );
+      const pageData: any = await response.json();
+      // console.log("PAGE DATA", pageData);
+      deviceList.push(...pageData["data"]["cusdeviceResponseDTO"]);
+    }
+
+    return {
+      total: deviceTotal,
+      deviceList: deviceList.map((item: any) => {
+        return {
+          id: item["cusdeviceNo"],
+          name: item["cusdeviceName"],
+          online: item["onlineOffline"],
+        };
+      }),
+    };
   }
 
   public static async getBaseStationCount(projectId: string): Promise<number> {
@@ -410,13 +445,11 @@ export class DataService {
   }
 
   public static async getLatestData(
-    projectId: string,    // 查询某组织的数据
-    type: string,         // 类型：上月，本月，总
-    dataType: string,     // 数据类型：power/charge => 电能/电费
-    groupBy: string,      // 分组统计: op/suborg => 运营商/子组织
-  ) {
-
-  }
+    projectId: string, // 查询某组织的数据
+    type: string, // 类型：上月，本月，总
+    dataType: string, // 数据类型：power/charge => 电能/电费
+    groupBy: string // 分组统计: op/suborg => 运营商/子组织
+  ) {}
 
   public static async getElectricalPowerGroupByOperator(
     projectId: string,

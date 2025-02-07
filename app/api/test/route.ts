@@ -1,5 +1,5 @@
 import { cache, get } from "@/lib/cache.service";
-import { DataService } from "@/lib/usrcloud.service";
+import { DataService, DeviceService } from "@/lib/usrcloud.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -9,10 +9,11 @@ export async function GET(
   const projectId = "323324";
 
   // 2. 获取用户信息
-  const result = await DataService.getElectricChargeGroupByOperator(
-    projectId,
-    "total"
-  );
+  // const result = await DataService.getElectricChargeGroupByOperator(
+  //   projectId,
+  //   "total"
+  // );
+  const result = await DeviceService.loadAllDevice(projectId);
 
   // const result = await fetch("https://echarts.apache.org/examples/data/asset/geo/HK.json", {
   //     method: "GET"
