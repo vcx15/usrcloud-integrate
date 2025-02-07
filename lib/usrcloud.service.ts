@@ -2,7 +2,8 @@ import { pad } from "echarts/types/src/util/time.js";
 import { get } from "./cache.service";
 import { Province } from "./entities";
 import dayjs from "dayjs";
-import getAdcodeByProjectId, { getAdnameByProjectId } from "./utils";
+import getAdcodeByProjectId, { getAdnameByProjectId, sleep } from "./utils";
+import { publicDecrypt } from "crypto";
 
 // Configuration
 const API_URL =
@@ -48,6 +49,54 @@ export const fetchDataHistoryServerAddress = async (): Promise<string> => {
   const result = await response.json();
 
   return result["data"]["historyServerAddr"];
+};
+
+export const fetchFullDatapoint = async (cusDeviceId: string): Promise<any> => {
+  const token = await get("token", fetchUserToken);
+
+  const response = await fetch(
+    "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Token": token,
+      },
+      body: JSON.stringify({
+        cusdeviceNo: cusDeviceId,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  const dataSize = data["data"]["total"];
+
+  const dataPointList = [];
+  while (dataPointList.length < dataSize) {
+    // console.log("dataPointList.length", dataPointList.length);
+    // console.log("dataSize", dataSize);
+    const response = await fetch(
+      `https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Token": token,
+        },
+        body: JSON.stringify({
+          cusdeviceNo: cusDeviceId,
+          pageNo: dataPointList.length / 500 + 1,
+          pageSize: 500,
+        }),
+      }
+    );
+    const pageData: any = await response.json();
+    // console.log("PAGE DATA", pageData);
+    dataPointList.push(...pageData["data"]["cusdeviceDataPointList"]);
+  }
+
+  return dataPointList;
 };
 
 export class UserService {
@@ -103,16 +152,19 @@ export class OrgService {
         return {
           id: item["id"],
           name: item["projectName"],
-          adcode: getAdcodeByProjectId((item["id"]).toString()),
-          adName: getAdnameByProjectId((item["id"]).toString())
+          adcode: getAdcodeByProjectId(item["id"].toString()),
+          adName: getAdnameByProjectId(item["id"].toString()),
         } as Province;
       });
-    return [{
-      id: rootOrgId,
-      name: "中国",
-      adcode: getAdcodeByProjectId((rootOrgId).toString()),
-      adName: getAdnameByProjectId((rootOrgId).toString())
-    }, ...provinceList];
+    return [
+      {
+        id: rootOrgId,
+        name: "中国",
+        adcode: getAdcodeByProjectId(rootOrgId.toString()),
+        adName: getAdnameByProjectId(rootOrgId.toString()),
+      },
+      ...provinceList,
+    ];
   }
 
   public static async getSubOrg(projectId: string) {
@@ -154,6 +206,30 @@ export class OrgService {
 }
 
 export class DeviceService {
+
+  // 加载组织下的所有设备
+  public static async loadAllDevice(projectId: string): Promise<any> {
+        // 基站数量
+        const token = await get("token", fetchUserToken);
+
+        const response = await fetch(
+          "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Access-Token": token,
+            },
+            body: JSON.stringify({
+              projectId: projectId,
+            }),
+          }
+        );
+    
+        const data = await response.json();
+
+  }
+
   public static async getBaseStationCount(projectId: string): Promise<number> {
     // 基站数量
     const token = await get("token", fetchUserToken);
@@ -237,49 +313,49 @@ export class DataService {
     isGroupByTime?: boolean
   ): Promise<any> {
     // 运营商能耗数据点
-    const token = await get("token", fetchUserToken);
+    // const token = await get("token", fetchUserToken);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          cusdeviceNo: cusDeviceId,
-        }),
-      }
-    );
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       cusdeviceNo: cusDeviceId,
+    //     }),
+    //   }
+    // );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    const dataSize = data["data"]["total"];
+    // const dataSize = data["data"]["total"];
 
-    const dataPointList = [];
-    while (dataPointList.length < dataSize) {
-      console.log("dataPointList.length", dataPointList.length);
-      console.log("dataSize", dataSize);
-      const response = await fetch(
-        `https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": token,
-          },
-          body: JSON.stringify({
-            cusdeviceNo: cusDeviceId,
-            pageNo: dataPointList.length / 500 + 1,
-            pageSize: 500,
-          }),
-        }
-      );
-      const pageData: any = await response.json();
-      console.log("PAGE DATA", pageData);
-      dataPointList.push(...pageData["data"]["cusdeviceDataPointList"]);
-    }
+    // const dataPointList = [];
+    // while (dataPointList.length < dataSize) {
+    //   // console.log("dataPointList.length", dataPointList.length);
+    //   // console.log("dataSize", dataSize);
+    //   const response = await fetch(
+    //     `https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getDataPointInfoForCusdeviceNo`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "X-Access-Token": token,
+    //       },
+    //       body: JSON.stringify({
+    //         cusdeviceNo: cusDeviceId,
+    //         pageNo: dataPointList.length / 500 + 1,
+    //         pageSize: 500,
+    //       }),
+    //     }
+    //   );
+    //   const pageData: any = await response.json();
+    //   // console.log("PAGE DATA", pageData);
+    //   dataPointList.push(...pageData["data"]["cusdeviceDataPointList"]);
+    // }
     // console.log("DATA POINT LIST", dataPointList);
     // console.log(
     //   "DATA POINT LIST FILTER",
@@ -291,6 +367,15 @@ export class DataService {
     //   "DATA POINT LIST MAP",
     //   dataPointList.map((item: any) => item["name"] as string)
     // );
+
+    const fullDatapointList = await get(
+      cusDeviceId + "_datapoint",
+      () => {
+        return fetchFullDatapoint(cusDeviceId);
+      },
+      24 * 60 * 60 * 1000
+    );
+
     let endString = "总" + category;
     switch (type) {
       case "total":
@@ -304,24 +389,33 @@ export class DataService {
         break;
     }
     return isGroupByTime
-      ? dataPointList
-        .filter((item: any) => (item["name"] as string) === "直流负载总电能")
-        .map((item: any) => {
-          return {
-            id: item["dataPointRelId"],
-            deviceId: cusDeviceId,
-            name: item["name"],
-          };
-        })
-      : dataPointList
-        .filter((item: any) => (item["name"] as string).endsWith(endString))
-        .map((item: any) => {
-          return {
-            id: item["dataPointRelId"],
-            deviceId: cusDeviceId,
-            name: item["name"],
-          };
-        });
+      ? fullDatapointList
+          .filter((item: any) => (item["name"] as string) === "直流负载总电能")
+          .map((item: any) => {
+            return {
+              id: item["dataPointRelId"],
+              deviceId: cusDeviceId,
+              name: item["name"],
+            };
+          })
+      : fullDatapointList
+          .filter((item: any) => (item["name"] as string).endsWith(endString))
+          .map((item: any) => {
+            return {
+              id: item["dataPointRelId"],
+              deviceId: cusDeviceId,
+              name: item["name"],
+            };
+          });
+  }
+
+  public static async getLatestData(
+    projectId: string,    // 查询某组织的数据
+    type: string,         // 类型：上月，本月，总
+    dataType: string,     // 数据类型：power/charge => 电能/电费
+    groupBy: string,      // 分组统计: op/suborg => 运营商/子组织
+  ) {
+
   }
 
   public static async getElectricalPowerGroupByOperator(
@@ -341,6 +435,8 @@ export class DataService {
         },
         body: JSON.stringify({
           projectId: projectId,
+          pageNo: 1,
+          pageSize: 500,
         }),
       }
     );
@@ -352,24 +448,38 @@ export class DataService {
         return {
           id: item["cusdeviceNo"],
           name: item["cusdeviceName"],
+          online: item["onlineOffline"],
         };
       }
     );
 
+    console.log("DEVICELIST", deviceList);
+
     // 2. 通过cusDeviceId查询所有的数据点
     const deviceDataList = [];
     for (const device of deviceList) {
+      if (!device.online) {
+        continue;
+      }
       const datapointList = await this.getDatapointList(
         device.id,
         type,
         "电能"
       );
 
-      const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
-      console.log("HISTORY SERVER ADDRESS", historyServerAddress);
+      const historyServerAddress = await get(
+        "historyServerAddress",
+        fetchDataHistoryServerAddress
+      );
+      // console.log("HISTORY SERVER ADDRESS", historyServerAddress);
       // 获取该设备的最新数据
 
-      console.log("DATAPONT LIST", datapointList);
+      // console.log("DATAPONT LIST", datapointList);
+      if ((datapointList as Array<any>).length === 0) {
+        continue;
+      }
+
+      // 获取数据
       const response = await fetch(
         `${historyServerAddress}/history/cusdevice/lastDataPoint`,
         {
@@ -390,7 +500,7 @@ export class DataService {
       );
 
       const result = await response.json();
-      console.log("RESULT", result);
+      // console.log("RESULT", result);
 
       const finalData = result["data"]["list"].map((item: any) => {
         return {
@@ -402,8 +512,10 @@ export class DataService {
         };
       });
 
-      console.log("FINAL DATA", finalData);
+      // console.log("FINAL DATA", finalData);
       deviceDataList.push(...finalData);
+
+      await sleep(6 * 1000);
     }
 
     console.log("deviceDataMap", deviceDataList);
@@ -503,7 +615,10 @@ export class DataService {
           "电能"
         );
 
-        const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
+        const historyServerAddress = await get(
+          "historyServerAddress",
+          fetchDataHistoryServerAddress
+        );
         console.log("HISTORY SERVER ADDRESS", historyServerAddress);
         // 获取该设备的最新数据
 
@@ -612,7 +727,10 @@ export class DataService {
         "电费"
       );
 
-      const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
+      const historyServerAddress = await get(
+        "historyServerAddress",
+        fetchDataHistoryServerAddress
+      );
       console.log("HISTORY SERVER ADDRESS", historyServerAddress);
       // 获取该设备的最新数据
 
@@ -763,7 +881,10 @@ export class DataService {
 
       console.log("DATALIST", datapointList);
 
-      const historyServerAddress = await get("historyServerAddress", fetchDataHistoryServerAddress);
+      const historyServerAddress = await get(
+        "historyServerAddress",
+        fetchDataHistoryServerAddress
+      );
       console.log("HISTORY SERVER ADDRESS", historyServerAddress);
 
       // 获取该设备的历史数据
@@ -799,27 +920,27 @@ export class DataService {
     const timeInterval =
       type === "yesterday"
         ? [
-          dayjs(yesterdayStart).valueOf(),
-          dayjs(yesterdayStart).add(3, "hour").valueOf(),
-          dayjs(yesterdayStart).add(6, "hour").valueOf(),
-          dayjs(yesterdayStart).add(9, "hour").valueOf(),
-          dayjs(yesterdayStart).add(12, "hour").valueOf(),
-          dayjs(yesterdayStart).add(15, "hour").valueOf(),
-          dayjs(yesterdayStart).add(18, "hour").valueOf(),
-          dayjs(yesterdayStart).add(21, "hour").valueOf(),
-          dayjs(yesterdayStart).add(24, "hour").valueOf(),
-        ]
+            dayjs(yesterdayStart).valueOf(),
+            dayjs(yesterdayStart).add(3, "hour").valueOf(),
+            dayjs(yesterdayStart).add(6, "hour").valueOf(),
+            dayjs(yesterdayStart).add(9, "hour").valueOf(),
+            dayjs(yesterdayStart).add(12, "hour").valueOf(),
+            dayjs(yesterdayStart).add(15, "hour").valueOf(),
+            dayjs(yesterdayStart).add(18, "hour").valueOf(),
+            dayjs(yesterdayStart).add(21, "hour").valueOf(),
+            dayjs(yesterdayStart).add(24, "hour").valueOf(),
+          ]
         : [
-          dayjs(yesterdayEnd).valueOf(),
-          dayjs(yesterdayEnd).add(3, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(6, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(9, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(12, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(15, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(18, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(21, "hour").valueOf(),
-          dayjs(yesterdayEnd).add(24, "hour").valueOf(),
-        ];
+            dayjs(yesterdayEnd).valueOf(),
+            dayjs(yesterdayEnd).add(3, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(6, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(9, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(12, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(15, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(18, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(21, "hour").valueOf(),
+            dayjs(yesterdayEnd).add(24, "hour").valueOf(),
+          ];
 
     const finalDeviceDataList = [];
     for (const deviceData of deviceDataList) {
@@ -914,6 +1035,6 @@ export class DataService {
       };
     });
 
-    return alarmList
+    return alarmList;
   }
 }

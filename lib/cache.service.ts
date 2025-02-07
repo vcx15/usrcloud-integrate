@@ -1,5 +1,4 @@
 import { Cacheables } from "cacheables";
-import { fetchUserToken } from "./usrcloud.service";
 
 export const cache = new Cacheables({
   enabled: true,
@@ -10,5 +9,5 @@ export const cache = new Cacheables({
 export const get = (key: string, action: () => Promise<any>, expireTime?: number) =>
   cache.cacheable(action, key, {
     cachePolicy: "max-age",
-    maxAge: expireTime ?? 7200000, // 2 hours
+    maxAge: expireTime ?? 2 * 60 * 60 * 1000, // 2 hours
   });

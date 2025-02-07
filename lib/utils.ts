@@ -56,4 +56,8 @@ export function getAdnameByProjectId(projectId: string) {
   }
 }
 
+export async function sleep(time?: number) {
+  return new Promise((resolve) => setTimeout(resolve, time ?? 1 * 1000));
+}
+
 // export default async function mapProvinceName()
