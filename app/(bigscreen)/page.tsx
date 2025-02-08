@@ -67,40 +67,48 @@ export default function BigScreen() {
   }, []);
 
   // 地区列表加载
-  const [areaList, setAreaList] = useState<Array<any>>([])
-  const [selectedArea, setSelectedArea] = useState<Province>()
+  const [areaList, setAreaList] = useState<Array<any>>([]);
+  const [selectedArea, setSelectedArea] = useState<Province>();
 
   const loadAreaList = () => {
     fetch("/api/org/province", {
-      method: "GET"
-    }).then(async (response) => {
-      const result = await response.json();
-      console.log("RESPONSE", result)
-      setAreaList(result["provinceList"])
-    }).catch((error) => {
-      console.error("ERROR", error)
+      method: "GET",
     })
-  }
+      .then(async (response) => {
+        const result = await response.json();
+        console.log("RESPONSE", result);
+        setAreaList(result["provinceList"]);
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
+  };
 
   useEffect(() => {
     loadAreaList();
     setSelectedArea(areaList.at(0));
-  }, [])
+  }, []);
 
-  const [rootProjectId, setRootProjectId] = useState<string>("")
+  const [rootProjectId, setRootProjectId] = useState<string>("");
   useEffect(() => {
-    UserService.getUser().then((user) => {
-      setRootProjectId(user["data"]["projectId"])
-    }).catch((error) => {
-      console.error("ERROR", error)
-    })
+    UserService.getUser()
+      .then((user) => {
+        setRootProjectId(user["data"]["projectId"]);
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
     // const rootOrgId = user["data"]["projectId"];
-  }, [])
+  }, []);
   return (
     <div className="flex flex-col">
-      <HeadArea areaList={areaList} selectedArea={selectedArea} updateSelectedArea={(area: Province) => {
-        setSelectedArea(area)
-      }} />
+      <HeadArea
+        areaList={areaList}
+        selectedArea={selectedArea}
+        updateSelectedArea={(area: Province) => {
+          setSelectedArea(area);
+        }}
+      />
       <div className="flex flex-row mt-4 mb-3.5 mx-3.5 h-[61.5625rem] space-x-4">
         <div className="flex flex-col w-[35.625rem] space-y-4">
           <ObjectStatisticsArea projectId={selectedArea?.id ?? rootProjectId} />
@@ -121,9 +129,13 @@ export default function BigScreen() {
   );
 }
 
-function HeadArea({ areaList, selectedArea, updateSelectedArea }: {
-  areaList: Array<any>,
-  selectedArea?: Province,
+function HeadArea({
+  areaList,
+  selectedArea,
+  updateSelectedArea,
+}: {
+  areaList: Array<any>;
+  selectedArea?: Province;
   updateSelectedArea: (area: Province) => void;
 }) {
   const [currentTime, setCurrentTime] = useState<string>();
@@ -161,20 +173,29 @@ function HeadArea({ areaList, selectedArea, updateSelectedArea }: {
         <Popover
           content={
             <div className="flex flex-col">
-              {
-                areaList.map((item: any, index: number) => {
-                  return <div className="hover:cursor-pointer" key={index} onClick={() => {
-                    updateSelectedArea(item as Province)
-                  }}>{item.name}</div>
-                })
-              }
+              {areaList.map((item: any, index: number) => {
+                return (
+                  <div
+                    className="hover:cursor-pointer"
+                    key={index}
+                    onClick={() => {
+                      updateSelectedArea(item as Province);
+                    }}
+                  >
+                    {item.name}
+                  </div>
+                );
+              })}
             </div>
           }
           arrow={false}
           trigger={"click"}
         >
           <div className="flex flex-col justify-end mb-3 w-[180px]">
-            <DropDownButton icon={LocationIcon} text={`${selectedArea?.name ?? "中国"}(1/${areaList.length})`} />
+            <DropDownButton
+              icon={LocationIcon}
+              text={`${selectedArea?.name ?? "中国"}(1/${areaList.length})`}
+            />
           </div>
         </Popover>
         <div className="flex flex-col justify-end mb-3">
@@ -197,40 +218,44 @@ function HeadArea({ areaList, selectedArea, updateSelectedArea }: {
 }
 
 function ObjectStatisticsArea({ projectId }: { projectId: string }) {
-  const [basestationCount, setBasestationCount] = useState<number>(0)
-  const [controllerCount, setControllerCount] = useState<number>(0)
-  const [cameraCount, setCameraCount] = useState<number>(0)
-  const [otherCount, setOtherCount] = useState<number>(0)
+  const [basestationCount, setBasestationCount] = useState<number>(0);
+  const [controllerCount, setControllerCount] = useState<number>(0);
+  const [cameraCount, setCameraCount] = useState<number>(0);
+  const [otherCount, setOtherCount] = useState<number>(0);
 
   const loadStatistic = () => {
     // 加载基站数量数据
     fetch(`/api/project/${projectId}/device-count/base-station`, {
-      method: "GET"
-    }).then(async (response) => {
-      const result = await response.json();
-      setBasestationCount(result["count"])
-    }).catch((error) => {
-      console.error("ERROR", error)
-    });
+      method: "GET",
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        setBasestationCount(result["count"]);
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
 
     // 加载控制器数量数据
     fetch(`/api/project/${projectId}/device-count/controller`, {
-      method: "GET"
-    }).then(async (response) => {
-      const result = await response.json();
-      setControllerCount(result["count"])
-    }).catch((error) => {
-      console.error("ERROR", error)
-    });
-  }
+      method: "GET",
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        setControllerCount(result["count"]);
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
+  };
 
   useEffect(() => {
-    projectId && loadStatistic()
+    projectId && loadStatistic();
     // const timer = setInterval(loadStatistic, 2 * 60 * 1000);
     // return () => {
     //   clearInterval(timer);
     // };
-  }, [projectId])
+  }, [projectId]);
   return (
     <div className="flex flex-col  w-full h-60 text-center">
       <AreaTitle title="对象统计" />
@@ -265,29 +290,35 @@ function ObjectStatisticsArea({ projectId }: { projectId: string }) {
 }
 
 function EnergyConsumeArea({ projectId }: { projectId: string }) {
-  const [data, setData] = useState<Array<number>>([
-    0, 0, 0, 0, 0, 0, 0, 0,
-  ]);
+  const [data, setData] = useState<Array<number>>([0, 0, 0, 0, 0, 0, 0, 0]);
   const [type, setType] = useState<string>("lastMonth");
 
   const loadData = () => {
-    fetch(`/api/project/${projectId}/electric-power/${type}/group-by-operator`, {
-      method: "GET"
-    }).then(async (res) => {
-      const result = await res.json();
-      setData(result["data"])
-    }).catch((error) => {
-      console.error("ERROR", error)
-    });
-  }
+    fetch(
+      `/api/project/${projectId}/electric-power/${type}/group-by-operator`,
+      {
+        method: "GET",
+      }
+    )
+      .then(async (res) => {
+        const result = await res.json();
+        setData(result["data"]);
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
+  };
 
   useEffect(() => {
-    projectId && loadData();
+    setTimeout(() => {
+      projectId && loadData();
+    }, 0);
+
     // const timer = setInterval(loadData, 5 * 60 * 1000);
     // return () => {
     //   clearInterval(timer);
     // };
-  }, [type, projectId])
+  }, [type, projectId]);
 
   return (
     <div className="flex flex-col  w-full h-[22.5rem] text-center">
@@ -325,11 +356,7 @@ function EnergyConsumeArea({ projectId }: { projectId: string }) {
     </div>
   );
 }
-function OrgEnergyConsumeArea({
-  projectId
-}: {
-  projectId: string
-}) {
+function OrgEnergyConsumeArea({ projectId }: { projectId: string }) {
   const [categories, setCategories] = useState<Array<string>>([
     "",
     "",
@@ -340,36 +367,37 @@ function OrgEnergyConsumeArea({
     "",
     "",
   ]);
-  const [data, setData] = useState<Array<number>>([
-    0, 0, 0, 0, 0, 0, 0, 0,
-  ]);
+  const [data, setData] = useState<Array<number>>([0, 0, 0, 0, 0, 0, 0, 0]);
   const [type, setType] = useState<string>("lastMonth");
 
   const loadData = () => {
-    // fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
-    //   method: "GET"
-    // }).then(async (res) => {
-    //   const result = await res.json();
-    //   const dataArray: Array<any> = result["data"]
-    //   setCategories(dataArray.map((item: any) => {
-    //     return item["name"]
-    //   }))
-    //   setData(dataArray.map((item: any) => {
-    //     return item["result"]
-    //   }))
-    // }).catch((error) => {
-    //   console.error("ERROR", error)
-    // });
-  }
+    fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
+      method: "GET",
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        const dataArray: Array<any> = result["data"];
+        setCategories(
+          dataArray.map((item: any) => {
+            return item["name"];
+          })
+        );
+        setData(
+          dataArray.map((item: any) => {
+            return item["result"];
+          })
+        );
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
+  };
 
   useEffect(() => {
-    projectId && loadData();
-    // const timer = setInterval(loadData, 5 * 60 * 1000);
-    // return () => {
-    //   clearInterval(timer);
-    // };
-  }, [type, projectId])
-
+    setTimeout(() => {
+      projectId && loadData();
+    }, 30000);
+  }, [type, projectId]);
 
   return (
     <div className="flex flex-col w-full h-[22.0625rem] text-center">
@@ -411,39 +439,43 @@ function OrgEnergyConsumeArea({
   );
 }
 
-function MapArea({ area, rootProjectId }: { area?: Province, rootProjectId?: string }) {
-
-  const [totalData, setTotalData] = useState<number>(0)
+function MapArea({
+  area,
+  rootProjectId,
+}: {
+  area?: Province;
+  rootProjectId?: string;
+}) {
+  const [totalData, setTotalData] = useState<number>(0);
   const [dataArray, setDataArray] = useState<Array<any>>([
     {
-        "id": 366973,
-        "name": "湖南铁塔分公司",
-        "adName": "湖南省",
-        "result": 217.92
+      id: 366973,
+      name: "湖南铁塔分公司",
+      adName: "湖南省",
+      result: 217.92,
     },
     {
-        "id": 365786,
-        "name": "福建铁塔分公司",
-        "adName": "福建省",
-        "result": 2.9000000000000004
+      id: 365786,
+      name: "福建铁塔分公司",
+      adName: "福建省",
+      result: 2.9000000000000004,
     },
     {
-        "id": 364002,
-        "name": "湖北铁塔分公司",
-        "adName": "湖北省",
-        "result": 9803.07
-    }
-])
+      id: 364002,
+      name: "湖北铁塔分公司",
+      adName: "湖北省",
+      result: 9803.07,
+    },
+  ]);
 
   const getTotal = (dataArray: Array<any>) => {
-    let total = 0
+    let total = 0;
     for (const data of dataArray) {
-      total += data["result"]
+      total += data["result"];
     }
 
-    return Math.floor(total)
-
-  }
+    return Math.floor(total);
+  };
   return (
     <div className="flex flex-col w-full h-[43.8125rem] text-center">
       <div className="flex flex-row justify-between mt-7">
@@ -456,7 +488,11 @@ function MapArea({ area, rootProjectId }: { area?: Province, rootProjectId?: str
           <Number num={getTotal(dataArray)} />
         </div>
       </div>
-      <MapChart adcode={area?.adcode ?? "100000"} projectId={area?.id ?? rootProjectId} dataArray={dataArray} />
+      <MapChart
+        adcode={area?.adcode ?? "100000"}
+        projectId={area?.id ?? rootProjectId}
+        dataArray={dataArray}
+      />
     </div>
   );
 }
@@ -469,12 +505,12 @@ function TrendArea() {
           tabButtonList={[
             {
               key: "yesterday",
-              action: () => { },
+              action: () => {},
               buttonName: "昨日",
             },
             {
               key: "today",
-              action: () => { },
+              action: () => {},
               buttonName: "今日",
             },
           ]}
@@ -495,14 +531,16 @@ function RatioArea() {
     for (const ratioData of ratioList) {
       total += ratioData.totalElectricPower;
     }
-    return total
-  }
+    return total;
+  };
 
   const getValue = (ratioList: Array<any>, opName: string) => {
     if (ratioList.length === 0) return 0;
-    return ratioList.find((item: any) => item.opName === opName)?.totalElectricPower ?? 0;
-  }
-
+    return (
+      ratioList.find((item: any) => item.opName === opName)
+        ?.totalElectricPower ?? 0
+    );
+  };
 
   useEffect(() => {
     setRatioList([
@@ -512,7 +550,7 @@ function RatioArea() {
       },
       {
         opName: "联通",
-        totalElectricPower: 5408.10,
+        totalElectricPower: 5408.1,
       },
       {
         opName: "电信",
@@ -520,94 +558,123 @@ function RatioArea() {
       },
       {
         opName: "广电",
-        totalElectricPower: 0.00,
+        totalElectricPower: 0.0,
       },
       {
         opName: "智联",
-        totalElectricPower: 0.00,
+        totalElectricPower: 0.0,
       },
       {
         opName: "铁塔",
-        totalElectricPower: 0.00,
+        totalElectricPower: 0.0,
       },
       {
         opName: "能源",
-        totalElectricPower: 0.00,
+        totalElectricPower: 0.0,
       },
       {
         opName: "无租户",
         totalElectricPower: 0.66,
-      }
-    ])
-  }, [])
+      },
+    ]);
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-60 text-center">
       <AreaTitle title="运营商能耗分摊占比" />
       <div className="flex flex-row h-full">
         <div className="w-[30%] h-full">
-          <RingPieChart total={getTotal(ratioList ?? [])} data={ratioList?.map((item: any) => {
-            return {
-              name: item["opName"],
-              value: item["totalElectricPower"]
+          <RingPieChart
+            total={getTotal(ratioList ?? [])}
+            data={
+              ratioList?.map((item: any) => {
+                return {
+                  name: item["opName"],
+                  value: item["totalElectricPower"],
+                };
+              }) ?? []
             }
-          }) ?? []} />
+          />
         </div>
         <div className="flex flex-col h-full w-[70%]">
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
               color={"bg-[#4DC0FCFF]"}
               name={"移动"}
-              value={(getValue(ratioList ?? [], "移动")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "移动") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "移动").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "移动")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
             <RatioCard
               color={"bg-[#F84446FF]"}
               name={"联通"}
-              value={(getValue(ratioList ?? [], "联通")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "联通") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "联通").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "联通")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
           </div>
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
               color={"bg-[#5676FCFF]"}
               name={"电信"}
-              value={(getValue(ratioList ?? [], "电信")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "电信") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "电信").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "电信")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
             <RatioCard
               color={"bg-[#FB9020FF]"}
               name={"广电"}
-              value={(getValue(ratioList ?? [], "广电")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "广电") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "广电").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "广电")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
           </div>
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
               color={"bg-[#ACB0FCFF]"}
               name={"铁塔"}
-              value={(getValue(ratioList ?? [], "铁塔")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "铁塔") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "铁塔").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "铁塔")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
             <RatioCard
               color={"bg-[#87AB46FF]"}
               name={"智联"}
-              value={(getValue(ratioList ?? [], "智联")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "智联") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "智联").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "智联")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
           </div>
           <div className="flex flex-row justify-between mx-auto">
             <RatioCard
               color={"bg-[#771FFCFF]"}
               name={"能源"}
-              value={(getValue(ratioList ?? [], "能源")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "能源") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "能源").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "能源")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
             <RatioCard
               color={"bg-[#489A20FF]"}
               name={"无租户"}
-              value={(getValue(ratioList ?? [], "无租户")).toString()}
-              ratio={(100 * getValue(ratioList ?? [], "无租户") / getTotal(ratioList ?? [])).toFixed(2)}
+              value={getValue(ratioList ?? [], "无租户").toString()}
+              ratio={(
+                (100 * getValue(ratioList ?? [], "无租户")) /
+                getTotal(ratioList ?? [])
+              ).toFixed(2)}
             />
           </div>
         </div>
@@ -616,18 +683,18 @@ function RatioArea() {
   );
 }
 function WarningArea() {
-  const [warningData, setWarningData] = useState<Array<any>>()
+  const [warningData, setWarningData] = useState<Array<any>>();
 
   const loadAlarmData = () => {
     fetch(`/api/alarm`, {
-      method: "GET"
-    }).then(async (res) => {
-      const result = await res.json();
-      setWarningData(result["data"])
-    }).catch((error) => {
-
+      method: "GET",
     })
-  }
+      .then(async (res) => {
+        const result = await res.json();
+        setWarningData(result["data"]);
+      })
+      .catch((error) => {});
+  };
 
   useEffect(() => {
     loadAlarmData();
@@ -649,20 +716,17 @@ function BillArea() {
           tabButtonList={[
             {
               key: "lastMonth",
-              action: () => {
-              },
+              action: () => {},
               buttonName: "上月",
             },
             {
               key: "thisMonth",
-              action: () => {
-              },
+              action: () => {},
               buttonName: "本月",
             },
             {
               key: "total",
-              action: () => {
-              },
+              action: () => {},
               buttonName: "总电费",
             },
           ]}

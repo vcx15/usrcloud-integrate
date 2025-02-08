@@ -99,6 +99,11 @@ export const fetchFullDatapoint = async (cusDeviceId: string): Promise<any> => {
   return dataPointList;
 };
 
+// 首次加载数据
+export const loadAllData = async (projectId: string): Promise<any> => {
+
+}
+
 export class UserService {
   public static async getUser() {
     const token = await get("token", fetchUserToken);
@@ -183,6 +188,8 @@ export class OrgService {
         },
         body: JSON.stringify({
           isTree: 0,
+          pageNo: 1,
+          pageSize: 500,
         }),
       }
     );
@@ -193,7 +200,7 @@ export class OrgService {
 
     const subOrgList = (
       data["data"]["list"].filter(
-        (item: any) => item["parentId"].toString() === projectId
+        (item: any) => item["parentId"]?.toString() === projectId
       ) as Array<any>
     ).map((item: any) => {
       return {
@@ -266,50 +273,62 @@ export class DeviceService {
   }
 
   public static async getBaseStationCount(projectId: string): Promise<number> {
-    // 基站数量
-    const token = await get("token", fetchUserToken);
+    // // 基站数量
+    // const token = await get("token", fetchUserToken);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          projectId: projectId,
-        }),
-      }
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       projectId: projectId,
+    //     }),
+    //   }
+    // );
+
+    // const data = await response.json();
+    const result = await get(
+      projectId + "_device",
+      async () => {
+        return this.loadAllDevice(projectId);
+      },
+      24 * 60 * 60 * 1000
     );
-
-    const data = await response.json();
-    return data["data"]["total"];
+    return result["total"];
   }
 
   public static async getControllerCount(projectId: string): Promise<number> {
-    // 计量控制设备数量
+    // // 计量控制设备数量
     const token = await get("token", fetchUserToken);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          projectId: projectId,
-        }),
-      }
-    );
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       projectId: projectId,
+    //     }),
+    //   }
+    // );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    const deviceList = data["data"]["cusdeviceResponseDTO"] as Array<any>;
+    // const deviceList = data["data"]["cusdeviceResponseDTO"] as Array<any>;
+    const result = await get(projectId + "_device", async () => {
+      return this.loadAllDevice(projectId);
+    });
+
+    const deviceList = result["deviceList"];
     const cusDeviceIds = deviceList.map((device: any) => {
-      return device["cusdeviceNo"];
+      return device["id"];
     });
 
     let totalSlaveCount = 0;
@@ -328,15 +347,16 @@ export class DeviceService {
         }
       );
       const deviceDetail = await response.json();
-      console.debug(
-        (deviceDetail["data"]["cusdeviceSlaveRelDTO"] as Array<any>).length
-      );
-      totalSlaveCount += (
-        deviceDetail["data"]["cusdeviceSlaveRelDTO"] as Array<any>
-      ).length;
+      // console.debug(
+      //   (deviceDetail["data"]["cusdeviceSlaveRelDTO"] as Array<any>)?.length ??
+      //     0
+      // );
+      totalSlaveCount +=
+        (deviceDetail["data"]["cusdeviceSlaveRelDTO"] as Array<any>)?.length ??
+        0;
     }
 
-    return totalSlaveCount + deviceList.length;
+    return totalSlaveCount + (deviceList as Array<any>).length;
   }
 }
 
@@ -405,7 +425,7 @@ export class DataService {
 
     const fullDatapointList = await get(
       cusDeviceId + "_datapoint",
-      () => {
+      async () => {
         return fetchFullDatapoint(cusDeviceId);
       },
       24 * 60 * 60 * 1000
@@ -444,12 +464,22 @@ export class DataService {
           });
   }
 
-  public static async getLatestData(
-    projectId: string, // 查询某组织的数据
-    type: string, // 类型：上月，本月，总
-    dataType: string, // 数据类型：power/charge => 电能/电费
-    groupBy: string // 分组统计: op/suborg => 运营商/子组织
-  ) {}
+  // public static async getLatestData(
+  //   projectId: string, // 查询某组织的数据
+  //   type: string, // 类型：上月，本月，总
+  //   dataType: string, // 数据类型：power/charge => 电能/电费
+  //   groupBy: string // 分组统计: op/suborg => 运营商/子组织
+  // ) {
+  //   const allDevices = await get(
+  //     projectId + "_device",
+  //     async () => {
+  //       return DeviceService.loadAllDevice(projectId);
+  //     },
+  //     24 * 60 * 60 * 1000
+  //   );
+
+  //   const deviceList = allDevices["deviceList"];
+  // }
 
   public static async getElectricalPowerGroupByOperator(
     projectId: string,
@@ -458,40 +488,46 @@ export class DataService {
     // 1. 通过projectId查询所有的设备
     const token = await get("token", fetchUserToken);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          projectId: projectId,
-          pageNo: 1,
-          pageSize: 500,
-        }),
-      }
-    );
+    const result = await get(projectId + "_device", async () => {
+      return DeviceService.loadAllDevice(projectId);
+    });
 
-    const data = await response.json();
+    const deviceList = result["deviceList"];
 
-    const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
-      (item: any) => {
-        return {
-          id: item["cusdeviceNo"],
-          name: item["cusdeviceName"],
-          online: item["onlineOffline"],
-        };
-      }
-    );
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       projectId: projectId,
+    //       pageNo: 1,
+    //       pageSize: 500,
+    //     }),
+    //   }
+    // );
+
+    // const data = await response.json();
+
+    // const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
+    //   (item: any) => {
+    //     return {
+    //       id: item["cusdeviceNo"],
+    //       name: item["cusdeviceName"],
+    //       online: item["onlineOffline"],
+    //     };
+    //   }
+    // );
 
     console.log("DEVICELIST", deviceList);
 
     // 2. 通过cusDeviceId查询所有的数据点
     const deviceDataList = [];
     for (const device of deviceList) {
-      if (!device.online) {
+      if (!device["online"]) {
         continue;
       }
       const datapointList = await this.getDatapointList(
@@ -513,26 +549,55 @@ export class DataService {
       }
 
       // 获取数据
-      const response = await fetch(
-        `${historyServerAddress}/history/cusdevice/lastDataPoint`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": await get("token", fetchUserToken),
-          },
-          body: JSON.stringify({
-            dataPoints: datapointList.map((item: any) => {
-              return {
-                cusdeviceNo: item.deviceId,
-                dataPointId: item.id,
-              };
-            }),
-          }),
-        }
+      // const response = await fetch(
+      //   `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "X-Access-Token": await get("token", fetchUserToken),
+      //     },
+      //     body: JSON.stringify({
+      //       dataPoints: datapointList.map((item: any) => {
+      //         return {
+      //           cusdeviceNo: item.deviceId,
+      //           dataPointId: item.id,
+      //         };
+      //       }),
+      //     }),
+      //   }
+      // );
+
+      // const result = await response.json();
+
+      const result = await get(
+        "lastDataPoint_" + device.id + type + "_电能",
+        async () => {
+          const response = await fetch(
+            `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Access-Token": await get("token", fetchUserToken),
+              },
+              body: JSON.stringify({
+                dataPoints: datapointList.map((item: any) => {
+                  return {
+                    cusdeviceNo: item.deviceId,
+                    dataPointId: item.id,
+                  };
+                }),
+              }),
+            }
+          );
+          const result = await response.json();
+
+          return result;
+        },
+        2 * 60 * 60 * 1000
       );
 
-      const result = await response.json();
       // console.log("RESULT", result);
 
       const finalData = result["data"]["list"].map((item: any) => {
@@ -610,38 +675,49 @@ export class DataService {
     const token = await get("token", fetchUserToken);
     // 1. 通过projectId查询下级组织列表
     const subOrgList = await OrgService.getSubOrg(projectId);
+    console.log("subOrgList", subOrgList);
 
     const allDeviceDataList = [];
     for (const subOrg of subOrgList) {
       // 2.a. 通过projectId查询所有的设备
-      const response = await fetch(
-        "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": token,
-          },
-          body: JSON.stringify({
-            projectId: subOrg.id,
-          }),
-        }
-      );
+      // const response = await fetch(
+      //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "X-Access-Token": token,
+      //     },
+      //     body: JSON.stringify({
+      //       projectId: subOrg.id,
+      //     }),
+      //   }
+      // );
 
-      const data = await response.json();
+      // const data = await response.json();
 
-      const deviceList = (
-        data["data"]["cusdeviceResponseDTO"] as Array<any>
-      ).map((item: any) => {
-        return {
-          id: item["cusdeviceNo"],
-          name: item["cusdeviceName"],
-        };
+      // const deviceList = (
+      //   data["data"]["cusdeviceResponseDTO"] as Array<any>
+      // ).map((item: any) => {
+      //   return {
+      //     id: item["cusdeviceNo"],
+      //     name: item["cusdeviceName"],
+      //   };
+      // });
+
+      const result = await get(subOrg.id + "_device", async () => {
+        return DeviceService.loadAllDevice(subOrg.id);
       });
+
+      const deviceList = result["deviceList"];
 
       // 2. 通过cusDeviceId查询所有的数据点
       const deviceDataList = [];
       for (const device of deviceList) {
+        if (!device["online"]) {
+          continue;
+        }
+
         const datapointList = await this.getDatapointList(
           device.id,
           type,
@@ -652,31 +728,40 @@ export class DataService {
           "historyServerAddress",
           fetchDataHistoryServerAddress
         );
-        console.log("HISTORY SERVER ADDRESS", historyServerAddress);
+        // console.log("HISTORY SERVER ADDRESS", historyServerAddress);
         // 获取该设备的最新数据
 
-        console.log("DATAPONT LIST", datapointList);
-        const response = await fetch(
-          `${historyServerAddress}/history/cusdevice/lastDataPoint`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Access-Token": await get("token", fetchUserToken),
-            },
-            body: JSON.stringify({
-              dataPoints: datapointList.map((item: any) => {
-                return {
-                  cusdeviceNo: item.deviceId,
-                  dataPointId: item.id,
-                };
-              }),
-            }),
-          }
+        // console.log("DATAPONT LIST", datapointList);
+        const result = await get(
+          "lastDataPoint_" + device.id + type + "_电能",
+          async () => {
+            const response = await fetch(
+              `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-Access-Token": await get("token", fetchUserToken),
+                },
+                body: JSON.stringify({
+                  dataPoints: datapointList.map((item: any) => {
+                    return {
+                      cusdeviceNo: item.deviceId,
+                      dataPointId: item.id,
+                    };
+                  }),
+                }),
+              }
+            );
+            const result = await response.json();
+
+            return result;
+          },
+          2 * 60 * 60 * 1000
         );
 
-        const result = await response.json();
-        console.log("RESULT", result);
+        // const result = await response.json();
+        // console.log("RESULT", result);
 
         const finalData = result["data"]["list"].map((item: any) => {
           return {
@@ -689,8 +774,10 @@ export class DataService {
           };
         });
 
-        console.log("FINAL DATA", finalData);
+        // console.log("FINAL DATA", finalData);
         deviceDataList.push(...finalData);
+
+        await sleep(6 * 1000);
       }
       allDeviceDataList.push(...deviceDataList);
     }
@@ -699,6 +786,21 @@ export class DataService {
     // 按subOrgId分组统计总量
     const resultList = [];
     for (const org of subOrgList) {
+      // console.log("ALL DEVICE DATA", allDeviceDataList);
+
+      const orgData = allDeviceDataList.filter(
+        (deviceData) => deviceData.projectId === org.id
+      );
+
+      if (!orgData || orgData.length === 0) {
+        resultList.push({
+          id: org.id,
+          name: subOrgList.find((item: any) => item.id === org.id)?.name ?? "",
+          result: 0,
+        });
+        continue;
+      }
+
       const result = allDeviceDataList
         .filter((deviceData) => deviceData.projectId === org.id)
         .reduce((result, deviceData) => {
@@ -724,36 +826,46 @@ export class DataService {
     type: string
   ): Promise<any> {
     // 1. 通过projectId查询所有的设备
-    const token = await get("token", fetchUserToken);
+    // const token = await get("token", fetchUserToken);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          projectId: projectId,
-        }),
-      }
-    );
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       projectId: projectId,
+    //     }),
+    //   }
+    // );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
-      (item: any) => {
-        return {
-          id: item["cusdeviceNo"],
-          name: item["cusdeviceName"],
-        };
-      }
-    );
+    // const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
+    //   (item: any) => {
+    //     return {
+    //       id: item["cusdeviceNo"],
+    //       name: item["cusdeviceName"],
+    //     };
+    //   }
+    // );
+
+    const result = await get(projectId + "_device", async () => {
+      return DeviceService.loadAllDevice(projectId);
+    });
+
+    const deviceList = result["deviceList"];
 
     // 2. 通过cusDeviceId查询所有的数据点
     const deviceDataList = [];
     for (const device of deviceList) {
+      if (!device["online"]) {
+        continue;
+      }
+
       const datapointList = await this.getDatapointList(
         device.id,
         type,
@@ -768,27 +880,54 @@ export class DataService {
       // 获取该设备的最新数据
 
       console.log("DATAPONT LIST", datapointList);
-      const response = await fetch(
-        `${historyServerAddress}/history/cusdevice/lastDataPoint`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": await get("token", fetchUserToken),
-          },
-          body: JSON.stringify({
-            dataPoints: datapointList.map((item: any) => {
-              return {
-                cusdeviceNo: item.deviceId,
-                dataPointId: item.id,
-              };
-            }),
-          }),
-        }
-      );
+      // const response = await fetch(
+      //   `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "X-Access-Token": await get("token", fetchUserToken),
+      //     },
+      //     body: JSON.stringify({
+      //       dataPoints: datapointList.map((item: any) => {
+      //         return {
+      //           cusdeviceNo: item.deviceId,
+      //           dataPointId: item.id,
+      //         };
+      //       }),
+      //     }),
+      //   }
+      // );
 
-      const result = await response.json();
-      console.log("RESULT", result);
+      // const result = await response.json();
+      const result = await get(
+        "lastDataPoint_" + device.id + type + "电费",
+        async () => {
+          const response = await fetch(
+            `${historyServerAddress}/history/cusdevice/lastDataPoint`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Access-Token": await get("token", fetchUserToken),
+              },
+              body: JSON.stringify({
+                dataPoints: datapointList.map((item: any) => {
+                  return {
+                    cusdeviceNo: item.deviceId,
+                    dataPointId: item.id,
+                  };
+                }),
+              }),
+            }
+          );
+          const result = await response.json();
+
+          return result;
+        },
+        2 * 60 * 60 * 1000
+      );
+      // console.log("RESULT", result);
 
       const finalData = result["data"]["list"].map((item: any) => {
         return {
@@ -802,6 +941,8 @@ export class DataService {
 
       console.log("FINAL DATA", finalData);
       deviceDataList.push(...finalData);
+
+      await sleep(6 * 1000);
     }
 
     console.log("deviceDataMap", deviceDataList);
@@ -863,30 +1004,36 @@ export class DataService {
     // 1. 通过projectId查询所有的设备
     const token = await get("token", fetchUserToken);
 
-    const response = await fetch(
-      "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Access-Token": token,
-        },
-        body: JSON.stringify({
-          projectId: projectId,
-        }),
-      }
-    );
+    // const response = await fetch(
+    //   "https://openapi.mp.usr.cn/usrCloud/V6/cusdevice/getCusdevices",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "X-Access-Token": token,
+    //     },
+    //     body: JSON.stringify({
+    //       projectId: projectId,
+    //     }),
+    //   }
+    // );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
-      (item: any) => {
-        return {
-          id: item["cusdeviceNo"],
-          name: item["cusdeviceName"],
-        };
-      }
-    );
+    // const deviceList = (data["data"]["cusdeviceResponseDTO"] as Array<any>).map(
+    //   (item: any) => {
+    //     return {
+    //       id: item["cusdeviceNo"],
+    //       name: item["cusdeviceName"],
+    //     };
+    //   }
+    // );
+
+    const allDevices = await get(projectId + "_device", async () => {
+      return DeviceService.loadAllDevice(projectId);
+    });
+
+    const deviceList = allDevices["deviceList"];
 
     // 确定历史数据范围
     const yesterdayStart = dayjs()
@@ -905,6 +1052,10 @@ export class DataService {
 
     const deviceDataList = [];
     for (const device of deviceList) {
+      if (!device["online"]) {
+        continue;
+      }
+
       const datapointList = await this.getDatapointList(
         device.id,
         "",
@@ -948,6 +1099,8 @@ export class DataService {
       console.log("RESULT", resultData);
 
       deviceDataList.push(...resultData["data"]["list"]);
+
+      await sleep(6 * 1000);
     }
 
     const timeInterval =
