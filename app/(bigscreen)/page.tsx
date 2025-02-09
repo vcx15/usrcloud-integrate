@@ -331,19 +331,26 @@ function EnergyConsumeArea({ projectId }: { projectId: string }) {
   const [type, setType] = useState<string>("lastMonth");
 
   const loadData = () => {
-    fetch(
-      `/api/project/${projectId}/electric-power/${type}/group-by-operator`,
-      {
-        method: "GET",
-      }
-    )
-      .then(async (res) => {
-        const result = await res.json();
-        setDisplayData(result["data"]);
-      })
-      .catch((error) => {
-        console.error("ERROR", error);
-      });
+    // fetch(
+    //   `/api/project/${projectId}/electric-power/${type}/group-by-operator`,
+    //   {
+    //     method: "GET",
+    //   }
+    // )
+    //   .then(async (res) => {
+    //     const result = await res.json();
+    //     setDisplayData(result["data"]);
+    //   })
+    //   .catch((error) => {
+    //     console.error("ERROR", error);
+    //   });
+    if (type === "total") {
+      setDisplayData([3227.38, 407.58, 5679.51, 0.0, 0.0, 0.0, 0.0, 5.34]);
+    } else if (type === "lastMonth") {
+      setDisplayData([843.65, 143.74, 787.67, 0.0, 0.0, 0.0, 0.0, 0.99]);
+    } else if (type === "thisMonth") {
+      setDisplayData([359.25, 82.61, 416.13, 0.0, 0.0, 0.0, 0.0, 5.34]);
+    }
   };
 
   useEffect(() => {
@@ -356,7 +363,7 @@ function EnergyConsumeArea({ projectId }: { projectId: string }) {
     };
     // console.log(data);
     // setDisplayData(data);
-  }, [projectId]);
+  }, [projectId, type]);
 
   return (
     <div className="flex flex-col  w-full h-[22.5rem] text-center">
@@ -429,21 +436,47 @@ function OrgEnergyConsumeArea({ projectId }: { projectId: string }) {
     //     .catch((error) => {
     //       console.error("ERROR", error);
     //     });
+
+    fetch(`/api/org/province/${projectId}/subOrg/`, {
+      method: "GET",
+    })
+      .then(async (res) => {
+        const result = await res.json();
+        const dataArray: Array<any> = result["subOrgs"];
+        setCategories(
+          dataArray
+            .filter((item: any) => item["name"] !== "test")
+            .map((item: any) => {
+              return item["name"];
+            })
+        );
+        setData(
+          dataArray
+            .filter((item: any) => item["name"] !== "test")
+            .map((item: any) => {
+              return parseFloat((Math.random() * 200).toFixed(2));
+            })
+        );
+      })
+      .catch((error) => {
+        console.error("ERROR", error);
+      });
   };
 
   useEffect(() => {
-    setCategories(
-      data.map((item: any) => {
-        return item["name"];
-      })
-    );
-    setData(
-      data.map((item: any) => {
-        return item["result"];
-      })
-    );
+    projectId && loadData();
+    // setCategories(
+    //   data.map((item: any) => {
+    //     return item["name"];
+    //   })
+    // );
+    // setData(
+    //   data.map((item: any) => {
+    //     return item["result"];
+    //   })
+    // );
     console.log("DATA ORG", data);
-  }, []);
+  }, [projectId]);
 
   return (
     <div className="flex flex-col w-full h-[22.0625rem] text-center">
