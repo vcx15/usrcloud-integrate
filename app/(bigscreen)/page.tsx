@@ -100,6 +100,30 @@ export default function BigScreen() {
       });
     // const rootOrgId = user["data"]["projectId"];
   }, []);
+
+  // const [energyConsumeAreaData, setEnergyConsumeAreaData] = useState<any>();
+  // const [orgEnergyConsumeAreaData, setOrgEnergyConsumeAreaData] =
+  //   useState<any>();
+
+  // const loadFirstPageData = async (projectId: string) => {
+  //   fetch(`/api/project/${projectId}/data`, {
+  //     method: "GET",
+  //   })
+  //     .then(async (response) => {
+  //       const result = await response.json();
+  //       setEnergyConsumeAreaData(result["dataGroupByOp"]);
+  //       setOrgEnergyConsumeAreaData(result["dataGroupByOrg"]);
+  //     })
+  //     .catch((error) => {
+  //       console.error("ERROR", error);
+  //     });
+  // };
+
+  // useEffect(() => {
+  //   const projectId = selectedArea?.id ?? rootProjectId;
+  //   projectId && loadFirstPageData(projectId);
+  // }, [selectedArea?.id]);
+
   return (
     <div className="flex flex-col">
       <HeadArea
@@ -205,6 +229,17 @@ function HeadArea({
           <GeneralButton
             customStyle="text-white bg-[#2E8BFFFF] px-4 py-1.5 rounded-2xl w-[96px] h-[34px]"
             text={"生成报表"}
+            onClick={() => {
+              const downloadElement = document.createElement("a");
+              downloadElement.style.display = "none";
+              downloadElement.href = "/report/test.xlsx";
+              downloadElement.target = "_blank";
+              downloadElement.rel = "noopener noreferrer";
+              downloadElement.download = "数据.xlsx";
+              document.body.appendChild(downloadElement);
+              downloadElement.click();
+              document.body.removeChild(downloadElement);
+            }}
           />
         </div>
       </div>
@@ -290,7 +325,9 @@ function ObjectStatisticsArea({ projectId }: { projectId: string }) {
 }
 
 function EnergyConsumeArea({ projectId }: { projectId: string }) {
-  const [data, setData] = useState<Array<number>>([0, 0, 0, 0, 0, 0, 0, 0]);
+  const [displayData, setDisplayData] = useState<Array<number>>([
+    0, 0, 0, 0, 0, 0, 0, 0,
+  ]);
   const [type, setType] = useState<string>("lastMonth");
 
   const loadData = () => {
@@ -302,7 +339,7 @@ function EnergyConsumeArea({ projectId }: { projectId: string }) {
     )
       .then(async (res) => {
         const result = await res.json();
-        setData(result["data"]);
+        setDisplayData(result["data"]);
       })
       .catch((error) => {
         console.error("ERROR", error);
@@ -313,12 +350,13 @@ function EnergyConsumeArea({ projectId }: { projectId: string }) {
     setTimeout(() => {
       projectId && loadData();
     }, 0);
-
-    // const timer = setInterval(loadData, 5 * 60 * 1000);
-    // return () => {
-    //   clearInterval(timer);
-    // };
-  }, [type, projectId]);
+    const timer = setInterval(loadData, 5 * 60 * 1000);
+    return () => {
+      clearInterval(timer);
+    };
+    // console.log(data);
+    // setDisplayData(data);
+  }, [projectId]);
 
   return (
     <div className="flex flex-col  w-full h-[22.5rem] text-center">
@@ -351,7 +389,7 @@ function EnergyConsumeArea({ projectId }: { projectId: string }) {
         />
       </div>
       <div className="h-full">
-        <BarWithBackgroundChart data={data} type={type} />
+        <BarWithBackgroundChart data={displayData} type={type} />
       </div>
     </div>
   );
@@ -371,33 +409,41 @@ function OrgEnergyConsumeArea({ projectId }: { projectId: string }) {
   const [type, setType] = useState<string>("lastMonth");
 
   const loadData = () => {
-    fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
-      method: "GET",
-    })
-      .then(async (res) => {
-        const result = await res.json();
-        const dataArray: Array<any> = result["data"];
-        setCategories(
-          dataArray.map((item: any) => {
-            return item["name"];
-          })
-        );
-        setData(
-          dataArray.map((item: any) => {
-            return item["result"];
-          })
-        );
-      })
-      .catch((error) => {
-        console.error("ERROR", error);
-      });
+    //   fetch(`/api/project/${projectId}/electric-power/${type}/group-by-suborg`, {
+    //     method: "GET",
+    //   })
+    //     .then(async (res) => {
+    //       const result = await res.json();
+    //       const dataArray: Array<any> = result["data"];
+    //       setCategories(
+    //         dataArray.map((item: any) => {
+    //           return item["name"];
+    //         })
+    //       );
+    //       setData(
+    //         dataArray.map((item: any) => {
+    //           return item["result"];
+    //         })
+    //       );
+    //     })
+    //     .catch((error) => {
+    //       console.error("ERROR", error);
+    //     });
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      projectId && loadData();
-    }, 30000);
-  }, [type, projectId]);
+    setCategories(
+      data.map((item: any) => {
+        return item["name"];
+      })
+    );
+    setData(
+      data.map((item: any) => {
+        return item["result"];
+      })
+    );
+    console.log("DATA ORG", data);
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-[22.0625rem] text-center">
